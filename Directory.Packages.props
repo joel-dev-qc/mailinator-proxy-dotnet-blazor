@@ -1,0 +1,34 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Azure.Identity" Version="1.13.1" />
+    <PackageVersion Include="Blazored.FluentValidation" Version="2.2.0" />
+    <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageVersion Include="Extensions.MudBlazor.StaticInput" Version="2.1.5" />
+    <PackageVersion Include="FuzzySharp" Version="2.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.12.19" />
+    <PackageVersion Include="MimeKit" Version="4.9.0" />
+    <PackageVersion Include="MudBlazor" Version="8.0.0-preview.6" />
+    <PackageVersion Include="FluentValidation" Version="11.11.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageVersion Include="MediatR" Version="12.4.1" />
+    <PackageVersion Include="Riok.Mapperly" Version="4.1.1" />
+    <PackageVersion Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+    <!-- Microsoft -->
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Localization" Version="9.0.0" />
+    <!-- /Microsoft -->
+    <!-- Entity Framework -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.4.0.108396" />
+    <!-- /Entity Framework -->
+  </ItemGroup>
+</Project>
