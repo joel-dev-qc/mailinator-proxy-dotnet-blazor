@@ -1,8 +1,13 @@
+using MailinatorProxy.API;
+using MailinatorProxy.API.Common.ApiClients.Mailinator;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddMailinatorApiClientProxy(builder.Configuration);
+builder.Services.AddMediatR();
 
 var app = builder.Build();
 
@@ -18,6 +23,8 @@ var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
+
+app.MapEndpoints();
 
 app.MapGet("/weatherforecast", () =>
     {

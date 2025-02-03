@@ -10,17 +10,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="MailinatorApiClient" />
+        <PackageReference Include="MediatR" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
+        <PackageReference Include="Riok.Mapperly" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Features\" />
     </ItemGroup>
 
 </Project>
