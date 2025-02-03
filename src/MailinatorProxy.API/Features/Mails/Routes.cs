@@ -11,7 +11,6 @@ public static class Routes
     public static void RegisterMailsRoutes(this WebApplication app)
     {
         var group = app.MapGroup("/mails")
-            .WithGroupName("Mails")
             .WithTags("Mails");
 
         GetMailInboxQueryEndpoint.RegisterRoute(group);
