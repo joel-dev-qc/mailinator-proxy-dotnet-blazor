@@ -3,23 +3,29 @@
 
 using mailinator_csharp_client.Models.Responses;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 
-public static class GetMailInboxQueryEndpoint
+internal static class GetMailInboxQueryEndpoint
 {
     public static void RegisterRoute(IEndpointRouteBuilder group)
     {
-        group.MapGet("/{Inbox}", async (
+        group.MapGet("/{Inbox}", async Task<Results<Ok<GetMailInboxQueryResponse>, NoContent>> (
                 ISender mediator,
-                [AsParameters] GetMailInboxQuery query) =>
+                [AsParameters] GetMailInboxQuery query,
+                CancellationToken cancellationToken) =>
             {
-                var response = await mediator.Send(query);
-                return response is not null ? Results.Ok(response) : Results.NotFound();
+                var response = await mediator.Send(query, cancellationToken);
+                return response is not null
+                    ? TypedResults.Ok<GetMailInboxQueryResponse>(response)
+                    : TypedResults.NoContent();
             })
+            .Produces<GetMailInboxQueryResponse>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent)
+            .WithOpenApi()
             .WithName("GetMailInbox")
-            .Produces<FetchInboxResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+            .WithDescription("Fetches the inbox of the specified mailinator inbox.");
     }
 }

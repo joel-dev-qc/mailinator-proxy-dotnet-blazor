@@ -11,10 +11,11 @@ namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 internal class GetMailInboxQueryHandler(
     IMailinatorClient mailinatorClient,
     ILogger<GetMailInboxQueryHandler> logger
-    ): IRequestHandler<GetMailInboxQuery, FetchInboxResponse>
+    ): IRequestHandler<GetMailInboxQuery, GetMailInboxQueryResponse>
 {
-    public Task<FetchInboxResponse> Handle(GetMailInboxQuery request, CancellationToken cancellationToken)
+    public async Task<GetMailInboxQueryResponse> Handle(GetMailInboxQuery request, CancellationToken cancellationToken)
     {
-        return mailinatorClient.MessagesClient.FetchInboxAsync(request.MapFetchInboxRequest());
+        var response = await mailinatorClient.MessagesClient.FetchInboxAsync(request.MapFetchInboxRequest());
+        return response.MapGetMailInboxQueryResponse();
     }
 }
