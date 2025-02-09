@@ -7,6 +7,9 @@ namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 
 public class GetMailInboxQueryResponse
 {
+    /// <summary>
+    /// Test XML docs
+    /// </summary>
     public string Domain { get; set; }
     public string To { get; set; }
     public List<MessageDto> Messages { get; set; } = [];

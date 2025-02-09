@@ -8,6 +8,7 @@
         <AssemblyName>MailinatorProxy.API</AssemblyName>
         <RootNamespace>MailinatorProxy.API</RootNamespace>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <UserSecretsId>9fd55861-06c2-4bd3-9d16-8fe434557076</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>

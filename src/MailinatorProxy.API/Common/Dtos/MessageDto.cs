@@ -17,10 +17,10 @@ public class MessageDto
     public Dictionary<string, object> Headers { get; set; }
     public List<PartDto> Parts { get; set; }
     public string Origfrom { get; set; }
-    public string Mrid { get; set; }
+    public string? Mrid { get; set; }
     public int Size { get; set; }
-    public string Stream { get; set; }
-    public string MsgType { get; set; }
+    public string? Stream { get; set; }
+    public string? MsgType { get; set; }
     public string Source { get; set; }
-    public string Text { get; set; }
+    public string? Text { get; set; }
 }

@@ -1,6 +1,5 @@
+using System.Reflection;
 using MailinatorProxy.API;
-using MailinatorProxy.API.Common.ApiClients.Mailinator;
-using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +10,11 @@ builder.Services.AddMailinatorApiClientProxy(builder.Configuration);
 builder.Services.AddMediatR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(opt =>
+{
+    string xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    opt.IncludeXmlComments(xmlFilename);
+});
 
 var app = builder.Build();
 
@@ -25,11 +29,6 @@ app.MapScalarApiReference(options =>
 
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
 app.MapEndpoints();
 

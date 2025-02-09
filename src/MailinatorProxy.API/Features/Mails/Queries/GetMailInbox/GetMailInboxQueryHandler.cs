@@ -15,7 +15,8 @@ internal class GetMailInboxQueryHandler(
 {
     public async Task<GetMailInboxQueryResponse> Handle(GetMailInboxQuery request, CancellationToken cancellationToken)
     {
-        var response = await mailinatorClient.MessagesClient.FetchInboxAsync(request.MapFetchInboxRequest());
+        var fetchInboxRequest = request.MapFetchInboxRequest();
+        var response = await mailinatorClient.MessagesClient.FetchInboxAsync(fetchInboxRequest);
         return response.MapGetMailInboxQueryResponse();
     }
 }
