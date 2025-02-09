@@ -23,7 +23,8 @@ internal class FluentValidationExceptionHandler(IProblemDetailsService problemDe
             HttpContext = httpContext,
             ProblemDetails = new ValidationProblemDetails
             {
-                Title = "one or more validation errors occurred.",
+                Title = "Validation Error",
+                Detail = "Validation failed for one or more properties.",
                 Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
                 Status = StatusCodes.Status400BadRequest,
                 Errors = fluentValidationException.Errors
