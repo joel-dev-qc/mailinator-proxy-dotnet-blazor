@@ -12,18 +12,16 @@ internal static class GetMailInboxQueryEndpoint
 {
     public static void RegisterRoute(IEndpointRouteBuilder group)
     {
-        group.MapGet("/inbox", async Task<Results<Ok<GetMailInboxQueryResponse>, NoContent>> (
+        group.MapGet("/inbox", async Task<Ok<GetMailInboxQueryResponse>> (
                 ISender mediator,
                 [AsParameters] GetMailInboxQuery query,
                 CancellationToken cancellationToken) =>
             {
                 var response = await mediator.Send(query, cancellationToken);
-                return response is not null
-                    ? TypedResults.Ok<GetMailInboxQueryResponse>(response)
-                    : TypedResults.NoContent();
+                return TypedResults.Ok(response);
             })
-            .Produces<GetMailInboxQueryResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent)
+            .Produces<GetMailInboxQueryResponse>()
+            .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest)
             .WithOpenApi()
             .WithName("GetMailInbox")
             .WithDescription("Fetches the inbox of the specified mailinator inbox.");
