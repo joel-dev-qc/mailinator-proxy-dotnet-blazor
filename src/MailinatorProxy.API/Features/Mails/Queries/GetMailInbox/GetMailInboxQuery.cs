@@ -15,7 +15,7 @@ internal class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
     /// <summary>
     /// Test of description
     /// </summary>
-    public string Inbox { get; set; } = "null";
+    public string? Inbox { get; set; } = "null";
 
     public int? Skip { get; set; }
 

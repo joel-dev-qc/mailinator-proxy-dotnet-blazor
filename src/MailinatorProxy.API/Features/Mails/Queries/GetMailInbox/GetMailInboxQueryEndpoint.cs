@@ -12,7 +12,7 @@ internal static class GetMailInboxQueryEndpoint
 {
     public static void RegisterRoute(IEndpointRouteBuilder group)
     {
-        group.MapGet("/{Inbox}", async Task<Results<Ok<GetMailInboxQueryResponse>, NoContent>> (
+        group.MapGet("/inbox", async Task<Results<Ok<GetMailInboxQueryResponse>, NoContent>> (
                 ISender mediator,
                 [AsParameters] GetMailInboxQuery query,
                 CancellationToken cancellationToken) =>
