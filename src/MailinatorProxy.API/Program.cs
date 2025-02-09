@@ -10,6 +10,7 @@ builder.Services.AddMailinatorApiClientProxy(builder.Configuration);
 builder.Services.AddMediatR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
 builder.Services.AddSwaggerGen(opt =>
 {
     string xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
