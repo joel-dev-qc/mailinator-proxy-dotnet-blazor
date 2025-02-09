@@ -12,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.AddFluentValidation();
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandlers();
 builder.Services.AddSwaggerGen(opt =>
 {
     string xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -31,6 +32,8 @@ app.MapScalarApiReference(options =>
 
 
 app.UseHttpsRedirection();
+
+app.UseExceptionHandler();
 
 app.MapEndpoints();
 
