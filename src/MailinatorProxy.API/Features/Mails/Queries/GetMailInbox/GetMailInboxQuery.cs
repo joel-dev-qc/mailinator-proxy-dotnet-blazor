@@ -5,23 +5,65 @@ using System.ComponentModel;
 using mailinator_csharp_client.Models.Responses;
 using MailinatorProxy.API.Common.Enums;
 using MediatR;
+using Microsoft.OpenApi.Validations.Rules;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 
-internal class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
+public class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
 {
+
+    [Description("""
+                 ## Description
+                 The domain from which to fetch email message summaries.
+                 ## Accepted values:
+                 - `public` - Fetch messages from the Public Mailinator System.
+                 - `private` - Fetch messages from all your Private Domains.
+                 - `[your_private_domain.com]` - Fetch messages from a specific Private Domain.
+                 - Defaults to `private`.
+                 """)]
     public string? Domain { get; set; } = "private";
 
-    /// <summary>
-    /// Test of description
-    /// </summary>
+    [Description("""
+                 ## Description
+                 The inbox from which to fetch email message summaries.
+                 ## Accepted values:
+                 - `null` or `*` - Fetch all messages for an entire domain.
+                 - `[inbox_name]` - Fetch messages for a specific inbox.
+                 - `[inbox_name*]` - Fetch messages for all inboxes matching a given prefix.
+                 - Defaults to `null`.
+                 """)]
     public string? Inbox { get; set; } = "null";
 
+    [Description("""
+                 ## Description
+                 Number of emails to skip in the result set.
+                 - Defaults to `0` if not provided.
+                 """)]
     public int? Skip { get; set; }
 
+    [Description("""
+                 ## Description
+                 Number of emails to fetch from the Private Domain.
+                 - Defaults to `50` if not provided.
+                 """)]
     public int? Limit { get; set; } = 50;
 
+    [Description("""
+                 ## Description
+                 Sort order of the results.
+                 ## Available values:
+                 - `SortingDirection.Ascending`
+                 - `SortingDirection.Descending`
+                 - Defaults to `SortingDirection.Descending`.
+                 """)]
+    [DefaultValue(SortingDirection.Descending)]
     public SortingDirection? Sort { get; set; } = SortingDirection.Descending;
 
+    [Description("""
+                 ## Description
+                 Specifies whether to decode encoded email subjects.
+                 - `true` to decode encoded subjects; `false` to return them as is.
+                 - Defaults to `false`.
+                 """)]
     public bool? DecodeSubject { get; set; }
 }

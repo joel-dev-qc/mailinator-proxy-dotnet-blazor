@@ -11,6 +11,7 @@ public class GetMailInboxQueryResponse
     /// Test XML docs
     /// </summary>
     public string Domain { get; set; }
+
     public string To { get; set; }
     public List<MessageDto> Messages { get; set; } = [];
 }

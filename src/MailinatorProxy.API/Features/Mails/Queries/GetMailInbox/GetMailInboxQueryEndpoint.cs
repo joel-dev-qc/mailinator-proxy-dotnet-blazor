@@ -12,7 +12,7 @@ internal static class GetMailInboxQueryEndpoint
 {
     public static void RegisterRoute(IEndpointRouteBuilder group)
     {
-        group.MapGet("/inbox", async Task<Ok<GetMailInboxQueryResponse>> (
+        group.MapGet("/{Domain}/{Inbox}", async Task<Ok<GetMailInboxQueryResponse>> (
                 ISender mediator,
                 [AsParameters] GetMailInboxQuery query,
                 CancellationToken cancellationToken) =>
@@ -24,6 +24,6 @@ internal static class GetMailInboxQueryEndpoint
             .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest)
             .WithOpenApi()
             .WithName("GetMailInbox")
-            .WithDescription("Fetches the inbox of the specified mailinator inbox.");
+            .WithDescription("This endpoint retrieves a list of messages summaries. You can retrieve a list by inbox, inboxes, or entire domain.");
     }
 }

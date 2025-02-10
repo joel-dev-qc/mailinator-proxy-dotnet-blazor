@@ -1,5 +1,7 @@
 using System.Reflection;
+using System.Text.Json;
 using MailinatorProxy.API;
+using MartinCostello.OpenApi;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,18 +12,20 @@ builder.Services.AddMailinatorApiClientProxy(builder.Configuration);
 builder.Services.AddMediatR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+builder.Services.AddOpenApiExtensions(options =>
+{
+    //options.SerializationContexts.Add(JsonSerializerOptionsExtensions.DefaultSerializationContext);
+    options.AddXmlComments<Program>();
+    //options.AddExamples = true;
+});
 builder.Services.AddFluentValidation();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandlers();
-builder.Services.AddSwaggerGen(opt =>
-{
-    string xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    opt.IncludeXmlComments(xmlFilename);
-});
 
 var app = builder.Build();
 
 app.MapOpenApi();
+app.MapOpenApiYaml();
 app.MapScalarApiReference(options =>
 {
     options

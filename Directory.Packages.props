@@ -10,6 +10,7 @@
     <PackageVersion Include="Extensions.MudBlazor.StaticInput" Version="2.1.5" />
     <PackageVersion Include="FuzzySharp" Version="2.0.2" />
     <PackageVersion Include="MailinatorApiClient" Version="1.0.5" />
+    <PackageVersion Include="MartinCostello.OpenApi.Extensions" Version="1.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.12.19" />
     <PackageVersion Include="MimeKit" Version="4.9.0" />
