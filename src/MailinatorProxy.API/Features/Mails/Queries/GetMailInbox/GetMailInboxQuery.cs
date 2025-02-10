@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using mailinator_csharp_client.Models.Responses;
 using MailinatorProxy.API.Common.Enums;
 using MediatR;
@@ -21,6 +22,7 @@ public class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
                  - `[your_private_domain.com]` - Fetch messages from a specific Private Domain.
                  - Defaults to `private`.
                  """)]
+    [Required]
     public string? Domain { get; set; } = "private";
 
     [Description("""
@@ -32,6 +34,7 @@ public class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
                  - `[inbox_name*]` - Fetch messages for all inboxes matching a given prefix.
                  - Defaults to `null`.
                  """)]
+    [Required]
     public string? Inbox { get; set; } = "null";
 
     [Description("""
@@ -46,6 +49,7 @@ public class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
                  Number of emails to fetch from the Private Domain.
                  - Defaults to `50` if not provided.
                  """)]
+    [Range(1, 100)]
     public int? Limit { get; set; } = 50;
 
     [Description("""
@@ -56,7 +60,6 @@ public class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
                  - `SortingDirection.Descending`
                  - Defaults to `SortingDirection.Descending`.
                  """)]
-    [DefaultValue(SortingDirection.Descending)]
     public SortingDirection? Sort { get; set; } = SortingDirection.Descending;
 
     [Description("""
