@@ -28,6 +28,10 @@
       <Content Include="..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+      <None Remove="Documentations\ApiDocumentation.md" />
+      <Content Include="Documentations\ApiDocumentation.md">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

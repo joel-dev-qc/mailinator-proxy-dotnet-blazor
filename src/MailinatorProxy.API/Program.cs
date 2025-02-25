@@ -1,7 +1,11 @@
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using MailinatorProxy.API;
+using MailinatorProxy.API.Common.Extensions;
+using MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 using MartinCostello.OpenApi;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,12 +15,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMailinatorApiClientProxy(builder.Configuration);
 builder.Services.AddMediatR();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.SetOpenApiDocumentation();
+});
 builder.Services.AddOpenApiExtensions(options =>
 {
-    //options.SerializationContexts.Add(JsonSerializerOptionsExtensions.DefaultSerializationContext);
-    options.AddXmlComments<Program>();
-    //options.AddExamples = true;
 });
 builder.Services.AddFluentValidation();
 builder.Services.AddProblemDetails();
