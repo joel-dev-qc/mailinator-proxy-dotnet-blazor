@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using MailinatorProxy.API.Features.Mails.Commands.DeleteMailAttachmentById;
 using MailinatorProxy.API.Features.Mails.Queries.GetMailAttachmentById;
 using MailinatorProxy.API.Features.Mails.Queries.GetMailAttachments;
 using MailinatorProxy.API.Features.Mails.Queries.GetMailById;
@@ -19,5 +20,6 @@ public static class Routes
         GetMailByIdQueryEndpoint.RegisterRoute(group);
         GetMailAttachmentsQueryEndpoint.RegisterRoute(group);
         GetMailAttachmentByIdQueryEndpoint.RegisterRoute(group);
+        DeleteMailByIdCommandEndpoint.RegisterRoute(group);
     }
 }
