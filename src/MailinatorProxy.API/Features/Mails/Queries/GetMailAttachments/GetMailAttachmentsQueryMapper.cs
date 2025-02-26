@@ -9,5 +9,5 @@ namespace MailinatorProxy.API.Features.Mails.Queries.GetMailAttachments;
 [Mapper]
 internal static partial class GetMailAttachmentsQueryMapper
 {
-    public static partial AttachmentDto MapAttachmentDto(this Attachment attachment);
+    public static partial AttachmentSummaryDto MapAttachmentDto(this Attachment attachment);
 }

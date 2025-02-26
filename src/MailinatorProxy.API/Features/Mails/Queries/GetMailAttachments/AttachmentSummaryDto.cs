@@ -3,7 +3,7 @@
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailAttachments;
 
-public class AttachmentDto
+public class AttachmentSummaryDto
 {
     public string Filename;
     public string ContentDisposition;
