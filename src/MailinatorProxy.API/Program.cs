@@ -1,11 +1,6 @@
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using MailinatorProxy.API;
 using MailinatorProxy.API.Common.Extensions;
-using MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 using MartinCostello.OpenApi;
-using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,7 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
-using mailinator_csharp_client.Models.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +20,7 @@ internal static class GetMailInboxQueryEndpoint
             })
             .Produces<GetMailInboxQueryResponse>()
             .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest)
-            .WithOpenApi()
+            .WithMetadata()
             .WithName("GetMailInbox")
             .WithDescription("This endpoint retrieves a list of messages summaries. You can retrieve a list by inbox, inboxes, or entire domain.");
     }

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using mailinator_csharp_client.Models.Responses;
 using MailinatorProxy.API.Common.Enums;
+using MartinCostello.OpenApi;
 using MediatR;
 using Microsoft.OpenApi.Validations.Rules;
 

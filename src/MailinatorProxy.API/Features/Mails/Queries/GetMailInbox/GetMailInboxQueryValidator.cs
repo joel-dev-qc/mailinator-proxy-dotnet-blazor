@@ -10,27 +10,21 @@ internal class GetMailInboxQueryValidator : AbstractValidator<GetMailInboxQuery>
     public GetMailInboxQueryValidator()
     {
         RuleFor(x => x.Domain)
-            .NotEmpty()
-            .WithMessage("Domain is required.");
+            .NotEmpty();
 
         RuleFor(x => x.Inbox)
-            .NotEmpty()
-            .WithMessage("Inbox is required.");
+            .NotEmpty();
 
         RuleFor(x => x.Skip)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("Skip must be greater than or equal to 0.");
+            .GreaterThanOrEqualTo(0);
 
         RuleFor(x => x.Limit)
-            .InclusiveBetween(1, 50)
-            .WithMessage("Limit must be between 1 and 50.");
+            .InclusiveBetween(1, 50);
 
         RuleFor(x => x.Sort)
-            .IsInEnum()
-            .WithMessage("Invalid sorting direction.");
+            .IsInEnum();
 
         RuleFor(x => x.DecodeSubject)
-            .NotNull()
-            .WithMessage("DecodeSubject is required.");
+            .NotNull();
     }
 }
