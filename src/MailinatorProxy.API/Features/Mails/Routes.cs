@@ -5,7 +5,6 @@ using MailinatorProxy.API.Features.Mails.Queries.GetMailAttachmentById;
 using MailinatorProxy.API.Features.Mails.Queries.GetMailAttachments;
 using MailinatorProxy.API.Features.Mails.Queries.GetMailById;
 using MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
-using MediatR;
 
 namespace MailinatorProxy.API.Features.Mails;
 
