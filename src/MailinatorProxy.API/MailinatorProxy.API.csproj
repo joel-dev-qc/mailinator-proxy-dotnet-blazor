@@ -36,6 +36,8 @@
 
     <ItemGroup>
       <Folder Include="Common\OpenApi\" />
+      <Folder Include="Common\Requests\" />
+      <Folder Include="Features\Mails\Models\" />
     </ItemGroup>
 
 </Project>

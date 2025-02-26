@@ -29,6 +29,7 @@ internal static class ServiceCollectionExtensions
     public static void AddExceptionHandlers(this IServiceCollection services)
     {
         services.AddExceptionHandler<FluentValidationExceptionHandler>();
+        services.AddExceptionHandler<MailinatorApiExceptionHandler>();
     }
 
     public static void AddFluentValidation(this IServiceCollection services)

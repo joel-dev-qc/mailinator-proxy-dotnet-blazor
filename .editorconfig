@@ -189,3 +189,9 @@ indent_size = 2
 end_of_line = lf
 [*.{cmd,bat}]
 end_of_line = crlf
+
+
+# Custom rules
+# C# files
+[*.cs]
+dotnet_diagnostic.CA2007.severity = none

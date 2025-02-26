@@ -30,6 +30,7 @@ internal class FluentValidationExceptionHandler(IProblemDetailsService problemDe
                 Errors = fluentValidationException.Errors
                     .ToDictionary(e => e.PropertyName, e => new[] {e.ErrorMessage})
             },
+            Exception = fluentValidationException,
         }).ConfigureAwait(false);
         return true;
     }

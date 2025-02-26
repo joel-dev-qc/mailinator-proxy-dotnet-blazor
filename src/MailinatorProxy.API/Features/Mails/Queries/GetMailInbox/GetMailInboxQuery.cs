@@ -3,11 +3,8 @@
 
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using mailinator_csharp_client.Models.Responses;
 using MailinatorProxy.API.Common.Enums;
-using MartinCostello.OpenApi;
 using MediatR;
-using Microsoft.OpenApi.Validations.Rules;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 
@@ -24,7 +21,7 @@ public class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
                  - Defaults to `private`.
                  """)]
     [Required]
-    public string? Domain { get; set; } = "private";
+    public string Domain { get; set; } = "private";
 
     [Description("""
                  ## Description
@@ -36,7 +33,7 @@ public class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
                  - Defaults to `null`.
                  """)]
     [Required]
-    public string? Inbox { get; set; } = "null";
+    public string Inbox { get; set; } = "null";
 
     [Description("""
                  ## Description
