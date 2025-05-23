@@ -1,3 +1,4 @@
+using MailinatorProxy.Shared.Dtos.Mails;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;

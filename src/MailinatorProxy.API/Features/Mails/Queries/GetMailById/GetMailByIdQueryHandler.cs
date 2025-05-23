@@ -4,6 +4,7 @@
 using mailinator_csharp_client.Models.Messages.Requests;
 using MailinatorProxy.API.Common.ApiClients.Mailinator;
 using MailinatorProxy.API.Common.Mappers;
+using MailinatorProxy.Shared.Dtos.Mails;
 using MediatR;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailById;

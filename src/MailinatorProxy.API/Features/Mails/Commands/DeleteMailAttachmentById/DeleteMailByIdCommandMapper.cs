@@ -1,4 +1,5 @@
 using mailinator_csharp_client.Models.Responses;
+using MailinatorProxy.Shared.Dtos.Mails;
 using Riok.Mapperly.Abstractions;
 
 namespace MailinatorProxy.API.Features.Mails.Commands.DeleteMailAttachmentById;

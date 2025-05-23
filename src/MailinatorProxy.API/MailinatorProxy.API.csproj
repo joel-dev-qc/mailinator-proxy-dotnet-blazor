@@ -35,9 +35,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Common\Dtos\" />
       <Folder Include="Common\OpenApi\" />
       <Folder Include="Common\Requests\" />
       <Folder Include="Features\Mails\Models\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MailinatorProxy.Shared\MailinatorProxy.Shared.csproj" />
     </ItemGroup>
 
 </Project>

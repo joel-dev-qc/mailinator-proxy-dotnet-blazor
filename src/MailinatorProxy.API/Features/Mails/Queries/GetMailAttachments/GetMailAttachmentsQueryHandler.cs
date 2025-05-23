@@ -1,8 +1,7 @@
 using MailinatorProxy.API.Common.ApiClients.Mailinator;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 using mailinator_csharp_client.Models.Messages.Requests;
+using MailinatorProxy.Shared.Dtos.Mails;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailAttachments;
 

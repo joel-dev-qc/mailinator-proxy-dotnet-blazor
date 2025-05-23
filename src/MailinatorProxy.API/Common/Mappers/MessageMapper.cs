@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using mailinator_csharp_client.Models.Messages.Entities;
-using MailinatorProxy.API.Common.Dtos;
+using MailinatorProxy.Shared.Dtos.Mails;
 using Riok.Mapperly.Abstractions;
 
 namespace MailinatorProxy.API.Common.Mappers;

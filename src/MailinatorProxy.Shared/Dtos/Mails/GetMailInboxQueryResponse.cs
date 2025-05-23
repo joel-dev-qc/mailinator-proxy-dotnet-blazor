@@ -1,10 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.ComponentModel;
-using MailinatorProxy.API.Common.Dtos;
-
-namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
+namespace MailinatorProxy.Shared.Dtos.Mails;
 
 public class GetMailInboxQueryResponse
 {

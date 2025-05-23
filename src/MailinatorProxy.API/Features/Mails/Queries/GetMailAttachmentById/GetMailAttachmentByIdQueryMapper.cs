@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using mailinator_csharp_client.Models.Responses;
+using MailinatorProxy.Shared.Dtos.Mails;
 using Riok.Mapperly.Abstractions;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailAttachmentById;

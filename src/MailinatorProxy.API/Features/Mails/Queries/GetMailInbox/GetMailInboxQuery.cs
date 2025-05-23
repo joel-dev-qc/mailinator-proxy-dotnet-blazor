@@ -4,6 +4,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using MailinatorProxy.API.Common.Enums;
+using MailinatorProxy.Shared.Dtos.Mails;
 using MediatR;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;

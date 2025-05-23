@@ -4,6 +4,7 @@
 using mailinator_csharp_client.Models.Messages.Requests;
 using mailinator_csharp_client.Models.Responses;
 using MailinatorProxy.API.Common.Mappers;
+using MailinatorProxy.Shared.Dtos.Mails;
 using Riok.Mapperly.Abstractions;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;

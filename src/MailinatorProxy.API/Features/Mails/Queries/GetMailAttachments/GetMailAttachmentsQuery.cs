@@ -1,4 +1,5 @@
 using MediatR;
+using MailinatorProxy.Shared.Dtos.Mails;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailAttachments;
 internal class GetMailAttachmentsQuery : IRequest<GetMailAttachmentsQueryResponse>

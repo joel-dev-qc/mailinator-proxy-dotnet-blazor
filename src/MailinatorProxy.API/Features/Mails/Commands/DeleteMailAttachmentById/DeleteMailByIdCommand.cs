@@ -1,3 +1,4 @@
+using MailinatorProxy.Shared.Dtos.Mails;
 using MediatR;
 
 namespace MailinatorProxy.API.Features.Mails.Commands.DeleteMailAttachmentById;
