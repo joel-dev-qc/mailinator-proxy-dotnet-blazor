@@ -2,7 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailinatorProxy.API", "src\MailinatorProxy.API\MailinatorProxy.API.csproj", "{D5E35E59-9979-4620-8116-6A37AA9FBD00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailinatorProxy.Web", "MailinatorProxy.Web\MailinatorProxy.Web.csproj", "{EFB67587-DF06-452E-A8D2-6AD33AC21213}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailinatorProxy.Web", "src\MailinatorProxy.Web\MailinatorProxy.Web.csproj", "{EFB67587-DF06-452E-A8D2-6AD33AC21213}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailinatorProxy.Shared", "src\MailinatorProxy.Shared\MailinatorProxy.Shared.csproj", "{AD5ED92E-5276-4273-A536-658477CFF468}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +20,9 @@ Global
 		{EFB67587-DF06-452E-A8D2-6AD33AC21213}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFB67587-DF06-452E-A8D2-6AD33AC21213}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFB67587-DF06-452E-A8D2-6AD33AC21213}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD5ED92E-5276-4273-A536-658477CFF468}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD5ED92E-5276-4273-A536-658477CFF468}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD5ED92E-5276-4273-A536-658477CFF468}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD5ED92E-5276-4273-A536-658477CFF468}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

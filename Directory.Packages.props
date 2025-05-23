@@ -22,6 +22,9 @@
     <PackageVersion Include="Riok.Mapperly" Version="4.1.1" />
     <PackageVersion Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
     <!-- Microsoft -->
+
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0"/>
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0" PrivateAssets="all"/>
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Localization" Version="9.0.0" />
     <!-- /Microsoft -->
