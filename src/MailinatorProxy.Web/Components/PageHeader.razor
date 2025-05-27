@@ -1,5 +1,20 @@
-<h3>PageHeader</h3>
+
+<PageTitle>@PageTitle</PageTitle>
+<MudStack Class="pa-3 mb-4" Row Justify="Justify.SpaceBetween" StretchItems="StretchItems.Start">
+    <MudStack>
+        <MudBreadcrumbs Items="@BreadcrumbItems" />
+        <MudText Typo="Typo.h1" Class="pl-3 mb-2">
+            @PageTitle
+        </MudText>
+    </MudStack>
+    <MudStack Class="pt-4">
+        @PageActions
+    </MudStack>
+</MudStack>
+
 
 @code {
-    
+    [Parameter] public required string PageTitle { get; set; }
+    [Parameter] public required List<BreadcrumbItem> BreadcrumbItems { get; set; }
+    [Parameter] public RenderFragment? PageActions { get; set; }
 }

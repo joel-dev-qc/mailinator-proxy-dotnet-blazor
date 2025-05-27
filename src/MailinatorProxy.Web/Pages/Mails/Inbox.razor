@@ -1,6 +1,97 @@
 @page "/Inbox"
-<h3>Inbox</h3>
+@using MailinatorProxy.Shared.Dtos.Mails
+@using MailinatorProxy.Web.ApiClients
+@using MailinatorProxy.Web.Components
+@inject IMalinatorApiClient MailinatorApiClient
+
+
+
+
+<PageHeader PageTitle="Home" BreadcrumbItems="@(new List<BreadcrumbItem>
+                                                                     {
+                                                                         new("Home", "home", true, icon: Icons.Material.Filled.Home),
+                                                                         new("Inbox", null, true, icon: Icons.Material.Filled.Inbox)
+                                                                     })" />
+<MudTable ServerData="ServerReload"
+          Hover="true"
+          @ref="_table"
+          Elevation="2"
+          T="MessageDto"
+          OnRowClick="OnSelectMessageEvent"
+          Dense="true">
+
+    <ToolBarContent>
+
+    </ToolBarContent>
+    <HeaderContent>
+
+        <MudTh>
+            <MudTableSortLabel SortLabel="@nameof(MessageDto.To)" T="MessageDto">To</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="@nameof(MessageDto.From)" T="MessageDto">From</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            Subject
+        </MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd Class="align-content-start">
+            <MudText Typo="Typo.body1" Class="bold">@context.To</MudText>
+            <MudText Typo="Typo.caption">@($"{@context.To}@{@context.Domain}")</MudText>
+        </MudTd>
+        <MudTd Class="align-content-start">
+            <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
+        </MudTd>
+        <MudTd Class="align-content-start">
+            <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
+        </MudTd>
+
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@if (_selectedMessage is not null)
+{
+    <MailDetails MessageReference="_selectedMessage" />
+}
 
 @code {
-    
+    private MudTable<MessageDto> _table;
+    private bool _isLoading = true;
+    private MessageDto? _selectedMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = false;
+    }
+
+
+    private async Task<TableData<MessageDto>> ServerReload(TableState state, CancellationToken token)
+    {
+        var result = await MailinatorApiClient.GetMailInboxAsync("private", "*");
+
+        return new TableData<MessageDto>()
+        {
+            Items = result.Messages,
+            TotalItems = result.Messages.Count
+        };
+    }
+
+    private async Task LoadMailDetails(string messageId)
+    {
+        var response = await MailinatorApiClient.GetMailByIdAsync("private", "*", messageId);
+        _selectedMessage = response.Message;
+    }
+
+    private async Task OnSelectMessageEvent(TableRowClickEventArgs<MessageDto> selectedMessage)
+    {
+        if (selectedMessage.Item is { } messageDto)
+        {
+            await LoadMailDetails(messageDto.Id);
+        }
+        StateHasChanged();
+    }
 }

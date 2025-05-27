@@ -1,7 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using MailinatorProxy.Web.Shared
+@inherits LayoutComponentBase
 
 @* Required *@
-<MudThemeProvider />
+<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="_customTheme"/>
 <MudPopoverProvider />
 
 @* Needed for dialogs *@
@@ -19,16 +20,35 @@
     <MudDrawer @bind-Open="@_drawerOpen">
         <MyNavMenu/>
     </MudDrawer>
-    <MudMainContent>
+    <MudMainContent Class="mt-16 pa-4">
         @Body
     </MudMainContent>
 </MudLayout>
 
 @code {
     bool _drawerOpen = true;
+    private bool _isDarkMode;
+    private MudThemeProvider _mudThemeProvider;
+    private CustomTheme _customTheme = new CustomTheme();
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _mudThemeProvider.WatchSystemPreference(OnSystemPreferenceChanged);
+            StateHasChanged();
+        }
+    }
+
+    private Task OnSystemPreferenceChanged(bool newValue)
+    {
+        _isDarkMode = newValue;
+        StateHasChanged();
+        return Task.CompletedTask;
     }
 }

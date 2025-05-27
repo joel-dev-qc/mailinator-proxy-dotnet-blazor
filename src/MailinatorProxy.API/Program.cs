@@ -21,10 +21,22 @@ builder.Services.AddFluentValidation();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandlers();
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 app.MapOpenApi();
 app.MapOpenApiYaml();
+
 app.MapScalarApiReference(options =>
 {
     options
@@ -32,6 +44,8 @@ app.MapScalarApiReference(options =>
         .WithTheme(ScalarTheme.Mars)
         .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
 });
+
+app.UseCors("AllowAll");
 
 
 app.UseHttpsRedirection();

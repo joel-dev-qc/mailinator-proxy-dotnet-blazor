@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using mailinator_csharp_client.Models.Messages.Entities;
-using MailinatorProxy.API.Common.Enums;
+using MailinatorProxy.Shared.Enums;
 
 namespace MailinatorProxy.API.Common.Mappers;
 

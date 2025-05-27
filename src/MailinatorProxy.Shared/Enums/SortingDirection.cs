@@ -3,7 +3,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace MailinatorProxy.API.Common.Enums;
+namespace MailinatorProxy.Shared.Enums;
 
 [JsonConverter(typeof(JsonStringEnumConverter<SortingDirection>))]
 public enum SortingDirection

@@ -3,8 +3,8 @@
 
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using MailinatorProxy.API.Common.Enums;
 using MailinatorProxy.Shared.Dtos.Mails;
+using MailinatorProxy.Shared.Enums;
 using MediatR;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
@@ -48,7 +48,7 @@ public class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
                  Number of emails to fetch from the Private Domain.
                  - Defaults to `50` if not provided.
                  """)]
-    [Range(1, 100)]
+    [Range(1, 50)]
     public int? Limit { get; set; } = 50;
 
     [Description("""
@@ -67,5 +67,5 @@ public class GetMailInboxQuery : IRequest<GetMailInboxQueryResponse>
                  - `true` to decode encoded subjects; `false` to return them as is.
                  - Defaults to `false`.
                  """)]
-    public bool? DecodeSubject { get; set; }
+    public bool DecodeSubject { get; set; }
 }

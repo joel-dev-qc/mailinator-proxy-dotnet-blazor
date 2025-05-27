@@ -21,6 +21,6 @@ public class MessageDto
     public int Size { get; set; }
     public string? Stream { get; set; }
     public string? MsgType { get; set; }
-    public string Source { get; set; }
+    public string? Source { get; set; }
     public string? Text { get; set; }
 }

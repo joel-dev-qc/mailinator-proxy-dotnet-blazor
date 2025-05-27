@@ -1,5 +1,71 @@
-<h3>MailDetails</h3>
+@using MailinatorProxy.Shared.Dtos.Mails
+@using MailinatorProxy.Web.ApiClients
+@inject IMalinatorApiClient MailinatorApiClient
+
+@if (MessageReference is not null)
+{
+    <MudPaper>
+        <div class="pa-4">
+            <MudText Typo="Typo.h4">@MessageReference.Subject</MudText>
+            <MudStack
+                Row
+                AlignItems="AlignItems.End"
+                Justify="Justify.SpaceBetween"
+                Spacing="2">
+                <MudText Typo="Typo.body1">@MessageReference.Origfrom</MudText>
+                <div>
+                    <MudText Typo="Typo.body2">
+                        @LongTimeToDateTime(MessageReference.Time)
+                    </MudText>
+                </div>
+            </MudStack>
+            <MudText Typo="Typo.caption">@FullToEmail(MessageReference)</MudText>
+        </div>
+
+        <div>
+            Message ID: <MudText Typo="Typo.body2">@MessageReference.Id</MudText>
+        </div>
+
+        <div class="pa-4">
+            <MudText Typo="Typo.body1">@MessageReference.Text</MudText>
+        </div>
+
+    </MudPaper>
+
+}
+
+
 
 @code {
-    
+    [Parameter, EditorRequired] public MessageDto MessageReference { get; set; }
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var test = "test";
+    }
+
+    private (string Name, string Email) ParseEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return (string.Empty, string.Empty);
+
+        var parts = email.Split('<', '>');
+        var name = parts.Length > 1 ? parts[0].Trim() : string.Empty;
+        var emailAddress = parts.Length > 1 ? parts[1].Trim() : parts[0].Trim();
+
+        return (name, emailAddress);
+    }
+
+    private string LongTimeToDateTime(long time)
+    {
+        var dateTime = DateTimeOffset.FromUnixTimeMilliseconds(time).DateTime;
+        return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    private string FullToEmail(MessageDto message){
+        return $"{message.To}@{message.Domain}";
+    }
 }

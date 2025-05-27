@@ -18,7 +18,7 @@
         <PackageReference Include="MailinatorApiClient" />
         <PackageReference Include="MartinCostello.OpenApi.Extensions" />
         <PackageReference Include="MediatR" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="Riok.Mapperly" />
         <PackageReference Include="Scalar.AspNetCore" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
