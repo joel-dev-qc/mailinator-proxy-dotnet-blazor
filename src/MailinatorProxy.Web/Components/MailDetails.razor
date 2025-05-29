@@ -3,6 +3,7 @@
 @using MailinatorProxy.Web.ApiClients
 @using System.Text.Json
 @using MailinatorProxy.Web.Extensions
+@using HighlightBlazor;
 @using MailinatorProxy.Web.Services
 @inject IMalinatorApiClient MailinatorApiClient
 @inject IClipboardService ClipboardService
@@ -46,15 +47,16 @@
 
         <MudTabs>
             <MudTabPanel Text="Email">
-                @((MarkupString)GetBody())
+                <div class="pa-4">
+                    @((MarkupString)GetBody())
+                </div>
             </MudTabPanel>
-             <MudTabPanel Text="Raw Message">
-                <pre>
-                    <code>
+            <MudTabPanel Text="Raw Message">
+                <div class="pa-4">
+                    <CodeHighlight CodeLanguage="json" Indent="true" >
                         @_rawJsonPayload
-                    </code>
-                </pre>
-
+                    </CodeHighlight>
+                </div>
             </MudTabPanel>
         </MudTabs>
 
@@ -68,9 +70,6 @@
     [Parameter, EditorRequired] public MessageDto MessageReference { get; set; }
 
     private string _rawJsonPayload;
-
-
-
 
 
     protected override async Task OnInitializedAsync()

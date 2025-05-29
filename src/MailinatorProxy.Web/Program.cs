@@ -1,3 +1,4 @@
+using HighlightBlazor;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MailinatorProxy.Web;
@@ -16,6 +17,7 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
 });
 builder.Services.AddScoped<IClipboardService, ClipboardService>();
+builder.Services.AddHighlight();
 builder.Services.AddScoped<IMalinatorApiClient>(sp =>
 {
     var httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:5273/") };
