@@ -45,15 +45,16 @@
             </MudToolBar>
         </div>
 
-        <MudTabs>
-            <MudTabPanel Text="Email">
+        <MudTabs Border="true">
+            <MudTabPanel Text="Email" Icon="@Icons.Material.Filled.Email">
                 <div class="pa-4">
                     @((MarkupString)GetBody())
                 </div>
             </MudTabPanel>
-            <MudTabPanel Text="Raw Message">
+            <MudTabPanel Text="JSON" Icon="@Icons.Material.Filled.Code">
+
                 <div class="pa-4">
-                    <CodeHighlight CodeLanguage="json" Indent="true" >
+                    <CodeHighlight CodeLanguage="json" Indent="true">
                         @_rawJsonPayload
                     </CodeHighlight>
                 </div>
