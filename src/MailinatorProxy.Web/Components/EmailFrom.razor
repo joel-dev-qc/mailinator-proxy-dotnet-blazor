@@ -1,0 +1,12 @@
+
+@* I want to display in two section 1. bold text with the name 2. grey light with a email surrounded of < > *@
+
+<span>
+    <MudText Typo="Typo.body1" Class="bold" Inline>@Name</MudText>
+    <MudText Typo="Typo.caption" Class="text-secondary" Inline>@($"<{Email}>")</MudText>
+</span>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Email { get; set; } = string.Empty;
+}

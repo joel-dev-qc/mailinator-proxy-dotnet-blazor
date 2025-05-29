@@ -5,6 +5,6 @@ namespace MailinatorProxy.Shared.Dtos.Mails;
 
 public class PartDto
 {
-    public Dictionary<string, object> Headers { get; set; }
+    public Dictionary<string, string> Headers { get; set; } = [];
     public string Body { get; set; }
 }

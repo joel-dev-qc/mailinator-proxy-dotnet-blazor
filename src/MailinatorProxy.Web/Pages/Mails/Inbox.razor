@@ -2,6 +2,7 @@
 @using MailinatorProxy.Shared.Dtos.Mails
 @using MailinatorProxy.Web.ApiClients
 @using MailinatorProxy.Web.Components
+@using MailinatorProxy.Web.Extensions
 @inject IMalinatorApiClient MailinatorApiClient
 
 
@@ -24,29 +25,36 @@
 
     </ToolBarContent>
     <HeaderContent>
-
         <MudTh>
-            <MudTableSortLabel SortLabel="@nameof(MessageDto.To)" T="MessageDto">To</MudTableSortLabel>
-        </MudTh>
-        <MudTh>
-            <MudTableSortLabel SortLabel="@nameof(MessageDto.From)" T="MessageDto">From</MudTableSortLabel>
+            From
         </MudTh>
         <MudTh>
             Subject
         </MudTh>
+        <MudTh>
+            To
+        </MudTh>
+        <MudTh>
+            Date
+        </MudTh>
+
     </HeaderContent>
     <RowTemplate>
         <MudTd Class="align-content-start">
-            <MudText Typo="Typo.body1" Class="bold">@context.To</MudText>
-            <MudText Typo="Typo.caption">@($"{@context.To}@{@context.Domain}")</MudText>
-        </MudTd>
-        <MudTd Class="align-content-start">
-            <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
+            <MudText Typo="Typo.body1" Class="bold">@context.Origfrom</MudText>
         </MudTd>
         <MudTd Class="align-content-start">
             <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
         </MudTd>
+        <MudTd Class="align-content-start">
+            <MudText Typo="Typo.body1" Class="bold">@($"{context.To}@{context.Domain}")</MudText>
+        </MudTd>
 
+        <MudTd Class="align-content-start">
+            <MudText Typo="Typo.body1" Class="bold">
+                <RelativeDate Date="@context.Time.ToDateTime()" />
+            </MudText>
+        </MudTd>
     </RowTemplate>
     <PagerContent>
         <MudTablePager />

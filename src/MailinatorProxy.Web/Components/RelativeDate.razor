@@ -1,0 +1,65 @@
+@using MailinatorProxy.Web.Extensions
+@implements IDisposable
+@if(Date.HasValue)
+{
+    <MudTooltip>
+        <ChildContent>
+            @if (DisplayTime)
+            {
+                <MudText Class="mr-2" Typo="TextTypo" Inline="true">@GetTime()</MudText>
+            }
+            <MudText Typo="TextTypo" Inline="true">
+                @Date.Value.ToRelativeDateString()
+            </MudText>
+        </ChildContent>
+        <TooltipContent>
+            <MudText Typo="Typo.caption">
+                @Date.Value.ToString("F")
+            </MudText>
+        </TooltipContent>
+    </MudTooltip>
+}
+
+@code {
+    [Parameter] public DateTime? Date { get; set; }
+    [Parameter] public Typo TextTypo { get; set; } = Typo.body2;
+    [Parameter] public bool DisplayTime { get; set; } = false;
+    private Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        if (Date.HasValue && (DateTime.UtcNow - Date.Value).TotalHours < 1)
+        {
+            _timer = new Timer(Refresh, null, 0, 5000);
+        }
+    }
+
+    private string GetTime()
+    {
+        if (Date is null)
+        {
+            return string.Empty;
+        }
+
+        // Return the time part HH:mm
+        return $"({Date.Value:HH:mm})";
+    }
+
+    private void Refresh(object? state)
+    {
+        if (Date.HasValue && (DateTime.UtcNow - Date.Value).TotalHours >= 1)
+        {
+            _timer?.Dispose();
+            _timer = null;
+        }
+        else
+        {
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}

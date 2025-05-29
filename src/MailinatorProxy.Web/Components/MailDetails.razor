@@ -1,34 +1,62 @@
 @using MailinatorProxy.Shared.Dtos.Mails
+@using MailinatorProxy.Shared.Extensions
 @using MailinatorProxy.Web.ApiClients
+@using System.Text.Json
+@using MailinatorProxy.Web.Extensions
+@using MailinatorProxy.Web.Services
 @inject IMalinatorApiClient MailinatorApiClient
+@inject IClipboardService ClipboardService
+@inject NavigationManager NavigationManager
 
 @if (MessageReference is not null)
 {
     <MudPaper>
         <div class="pa-4">
-            <MudText Typo="Typo.h4">@MessageReference.Subject</MudText>
+            <div class="d-flex align-center">
+                <MudText Typo="Typo.h5">@MessageReference.Subject</MudText>
+                <MudChip Class="ml-2" T="string" Label="true" Size="Size.Small" >
+                    @MessageReference.To
+                </MudChip>
+            </div>
+
             <MudStack
                 Row
                 AlignItems="AlignItems.End"
                 Justify="Justify.SpaceBetween"
                 Spacing="2">
-                <MudText Typo="Typo.body1">@MessageReference.Origfrom</MudText>
+                <EmailFrom Email="@MessageReference.Fromfull" Name="@MessageReference.From"/>
                 <div>
-                    <MudText Typo="Typo.body2">
-                        @LongTimeToDateTime(MessageReference.Time)
-                    </MudText>
+                    <RelativeDate Date="@MessageReference.Time.ToDateTime()" DisplayTime="true"/>
                 </div>
             </MudStack>
-            <MudText Typo="Typo.caption">@FullToEmail(MessageReference)</MudText>
         </div>
 
-        <div>
-            Message ID: <MudText Typo="Typo.body2">@MessageReference.Id</MudText>
+        <div class="d-flex">
+            <MudSpacer/>
+            <MudToolBar>
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete"/>
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert"
+                         AriaLabel="Open user menu">
+                    <MudMenuItem Label="Copy ID" Icon="@Icons.Material.Filled.ContentCopy" OnClick="CopyIdToClipboard" />
+                    <MudMenuItem Label="Copy URL" Icon="@Icons.Material.Filled.Link" OnClick="CopyUrlToClipboard" />
+                    <MudMenuItem Label="Copy JSON" Icon="@Icons.Material.Filled.Code" OnClick="CopyJsonToClipboard" />
+                </MudMenu>
+            </MudToolBar>
         </div>
 
-        <div class="pa-4">
-            <MudText Typo="Typo.body1">@MessageReference.Text</MudText>
-        </div>
+        <MudTabs>
+            <MudTabPanel Text="Email">
+                @((MarkupString)GetBody())
+            </MudTabPanel>
+             <MudTabPanel Text="Raw Message">
+                <pre>
+                    <code>
+                        @_rawJsonPayload
+                    </code>
+                </pre>
+
+            </MudTabPanel>
+        </MudTabs>
 
     </MudPaper>
 
@@ -39,33 +67,61 @@
 @code {
     [Parameter, EditorRequired] public MessageDto MessageReference { get; set; }
 
+    private string _rawJsonPayload;
+
+
 
 
 
     protected override async Task OnInitializedAsync()
     {
-        var test = "test";
+        _rawJsonPayload = JsonSerializer.Serialize(MessageReference, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
     }
 
-    private (string Name, string Email) ParseEmail(string email)
+    private string GetBody()
     {
-        if (string.IsNullOrWhiteSpace(email))
-            return (string.Empty, string.Empty);
+        var body = MessageReference.GetHtmlPart()?.Body
+                   ?? MessageReference.GetTextPart()?.Body
+                   ?? string.Empty;
 
-        var parts = email.Split('<', '>');
-        var name = parts.Length > 1 ? parts[0].Trim() : string.Empty;
-        var emailAddress = parts.Length > 1 ? parts[1].Trim() : parts[0].Trim();
+        if (string.IsNullOrWhiteSpace(body))
+            return string.Empty;
 
-        return (name, emailAddress);
+        var htmlDoc = new HtmlAgilityPack.HtmlDocument();
+        htmlDoc.LoadHtml(body);
+
+        var links = htmlDoc.DocumentNode.SelectNodes("//a");
+        if (links == null) return htmlDoc.DocumentNode.OuterHtml;
+        foreach (var link in links)
+        {
+            link.SetAttributeValue("target", "_blank");
+        }
+
+        return htmlDoc.DocumentNode.OuterHtml;
     }
 
-    private string LongTimeToDateTime(long time)
+    private async Task CopyIdToClipboard()
     {
-        var dateTime = DateTimeOffset.FromUnixTimeMilliseconds(time).DateTime;
-        return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
+        if (MessageReference is null)
+            return;
+
+        await ClipboardService.CopyToClipboardAsync(MessageReference.Id);
     }
 
-    private string FullToEmail(MessageDto message){
-        return $"{message.To}@{message.Domain}";
+    private async Task CopyUrlToClipboard()
+    {
+        await ClipboardService.CopyToClipboardAsync(NavigationManager.Uri);
+    }
+
+    private async Task CopyJsonToClipboard()
+    {
+        if (MessageReference is null)
+            return;
+
+        await ClipboardService.CopyToClipboardAsync(_rawJsonPayload);
     }
 }
