@@ -9,67 +9,100 @@
 
 
 <PageHeader PageTitle="Home" BreadcrumbItems="@(new List<BreadcrumbItem>
-                                                                     {
-                                                                         new("Home", "home", true, icon: Icons.Material.Filled.Home),
-                                                                         new("Inbox", null, true, icon: Icons.Material.Filled.Inbox)
-                                                                     })" />
-<MudTable ServerData="ServerReload"
-          Hover="true"
-          @ref="_table"
-          Elevation="2"
-          T="MessageDto"
-          OnRowClick="OnSelectMessageEvent"
-          Dense="true">
+                                              {
+                                                  new("Home", "home", true, icon: Icons.Material.Filled.Home),
+                                                  new("Inbox", null, true, icon: Icons.Material.Filled.Inbox)
+                                              })"/>
 
-    <ToolBarContent>
+<MudPaper>
+    <div class="pa-4">
+        @if (_isModeViewDetails)
+        {
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="GoBackToList"/>
+                <MudText Typo="Typo.h6">Message Details</MudText>
+            </MudStack>
+        }
+        else
+        {
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="GoBackToList"/>
+            </MudStack>
+        }
 
-    </ToolBarContent>
-    <HeaderContent>
-        <MudTh>
-            From
-        </MudTh>
-        <MudTh>
-            Subject
-        </MudTh>
-        <MudTh>
-            To
-        </MudTh>
-        <MudTh>
-            Date
-        </MudTh>
 
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd Class="align-content-start">
-            <MudText Typo="Typo.body1" Class="bold">@context.Origfrom</MudText>
-        </MudTd>
-        <MudTd Class="align-content-start">
-            <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
-        </MudTd>
-        <MudTd Class="align-content-start">
-            <MudText Typo="Typo.body1" Class="bold">@($"{context.To}@{context.Domain}")</MudText>
-        </MudTd>
+    </div>
 
-        <MudTd Class="align-content-start">
-            <MudText Typo="Typo.body1" Class="bold">
-                <RelativeDate Date="@context.Time.ToDateTime()" />
-            </MudText>
-        </MudTd>
-    </RowTemplate>
-    <PagerContent>
-        <MudTablePager />
-    </PagerContent>
-</MudTable>
+</MudPaper>
 
-@if (_selectedMessage is not null)
+@if (_selectedMessage is null)
 {
-    <MailDetails MessageReference="_selectedMessage" />
+    <MudTable ServerData="ServerReload"
+              Hover="true"
+
+              @ref="_table"
+              Elevation="2"
+              T="MessageDto"
+              RowClass="cursor-pointer"
+              OnRowClick="OnSelectMessageEvent">
+
+        <HeaderContent>
+            <MudTh>
+                From
+            </MudTh>
+            <MudTh>
+                Subject
+            </MudTh>
+            <MudTh>
+                To
+            </MudTh>
+            <MudTh>
+                Date
+            </MudTh>
+
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd Class="align-content-start">
+
+                <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
+            </MudTd>
+            <MudTd Class="align-content-start">
+                <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
+            </MudTd>
+            <MudTd Class="align-content-start">
+                <MudText Typo="Typo.body1" Class="bold">@($"{context.To}@{context.Domain}")</MudText>
+            </MudTd>
+
+            <MudTd Class="align-content-start">
+                <MudText Typo="Typo.body1" Class="bold">
+                    <RelativeDate Date="@context.Time.ToDateTime()"/>
+                </MudText>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager/>
+        </PagerContent>
+    </MudTable>
+}
+else
+{
+    <MudPaper Class="">
+        <div class="pa-4">
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="GoBackToList"/>
+                <MudText Typo="Typo.h6">Message Details</MudText>
+            </MudStack>
+        </div>
+        <MudDivider Class="my-2"/>
+        <MailDetails MessageReference="_selectedMessage"/>
+    </MudPaper>
 }
 
 @code {
     private MudTable<MessageDto> _table;
     private bool _isLoading = true;
     private MessageDto? _selectedMessage;
+    private bool _isModeViewDetails = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,6 +133,13 @@
         {
             await LoadMailDetails(messageDto.Id);
         }
+
         StateHasChanged();
     }
+
+    private void GoBackToList()
+    {
+        _selectedMessage = null;
+    }
+
 }
