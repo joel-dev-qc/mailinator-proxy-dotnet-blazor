@@ -9,9 +9,9 @@ using MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 
 namespace MailinatorProxy.API.Features.Mails;
 
-public static class Routes
+internal static class Routes
 {
-    public static void RegisterMailsRoutes(this WebApplication app)
+    internal static void RegisterMailsRoutes(this WebApplication app)
     {
         var group = app.MapGroup("/mails")
             .WithTags("Mails");
