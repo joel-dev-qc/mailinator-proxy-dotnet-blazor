@@ -20,6 +20,7 @@ builder.Services.AddMudServices(config =>
 });
 builder.Services.AddScoped<IClipboardService, ClipboardService>();
 builder.Services.AddScoped<IDomainService, DomainService>();
+builder.Services.AddScoped<IMailReadStateService, MailReadStateService>();
 builder.Services.AddScoped<DomainState>();
 builder.Services.AddHighlight();
 builder.Services.AddBlazoredLocalStorage();

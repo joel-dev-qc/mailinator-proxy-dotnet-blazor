@@ -4,9 +4,11 @@
 @using MailinatorProxy.Web.ApiClients
 @using MailinatorProxy.Web.Components
 @using MailinatorProxy.Web.Extensions
+@using MailinatorProxy.Web.Services
 @inject IMalinatorApiClient MailinatorApiClient
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@inject IMailReadStateService MailReadStateService
 
 <style>
     .row-hover-actions {
@@ -20,6 +22,10 @@
 
     tr:hover .actions-section {
         opacity: 1;
+    }
+
+    .unread-row td * {
+        font-weight: bold!important;
     }
 </style>
 
@@ -61,7 +67,7 @@
                       @ref="_table"
                       Elevation="2"
                       T="MessageDto"
-                      RowClass="cursor-pointer"
+                      RowClassFunc="GetRowClass"
                       OnRowClick="OnSelectMessageEvent">
 
                 <HeaderContent>
@@ -137,6 +143,8 @@
     private bool _isLoading = true;
     private MessageDto? _selectedMessage;
     private bool _isModeViewDetails = false;
+    private Dictionary<string, bool> _readStates = new();
+
 
     protected override async Task OnParametersSetAsync()
     {
@@ -154,6 +162,12 @@
     {
         var result = await MailinatorApiClient.GetMailInboxAsync(Domain, "*");
 
+        _readStates = new();
+        foreach (var msg in result.Messages)
+        {
+            _readStates[msg.Id] = await MailReadStateService.IsReadAsync(Domain, msg.Id);
+        }
+
         return new TableData<MessageDto>()
         {
             Items = result.Messages,
@@ -163,6 +177,8 @@
 
     private async Task LoadMailDetails(string messageId)
     {
+        await MailReadStateService.MarkAsReadAsync(Domain, messageId);
+
         var response = await MailinatorApiClient.GetMailByIdAsync(Domain, "*", messageId);
         _selectedMessage = response.Message;
         _isModeViewDetails = true;
@@ -184,6 +200,7 @@
     private async Task DeleteMessage(MessageDto message)
     {
         await MailinatorApiClient.DeleteMailByIdAsync(Domain, "*", message.Id);
+        await MailReadStateService.RemoveAsync(Domain, message.Id);
         await _table.ReloadServerData();
         Snackbar.Add("Message deleted successfully.", Severity.Info);
     }
@@ -201,6 +218,16 @@
 
         var basePath = $"/{Domain}/Inbox";
         NavigationManager.NavigateTo(basePath, replace: false);
+    }
+
+
+    private string GetRowClass(MessageDto message, int arg2)
+    {
+        var readClass = _readStates.TryGetValue(message.Id, out var isRead) && !isRead
+            ? "unread-row"
+            : string.Empty;
+
+        return $"cursor-pointer {readClass}";
     }
 
 }
