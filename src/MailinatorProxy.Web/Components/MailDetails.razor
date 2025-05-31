@@ -35,7 +35,7 @@
         <div class="d-flex">
             <MudSpacer/>
             <MudToolBar>
-                <MudIconButton Icon="@Icons.Material.Outlined.Delete"/>
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="DeleteMessage"/>
                 <MudMenu Icon="@Icons.Material.Filled.MoreVert"
                          AriaLabel="Open user menu">
                     <MudMenuItem Label="Copy ID" Icon="@Icons.Material.Filled.ContentCopy" OnClick="CopyIdToClipboard" />
@@ -69,6 +69,7 @@
 
 @code {
     [Parameter, EditorRequired] public MessageDto MessageReference { get; set; }
+    [Parameter, EditorRequired] public EventCallback<MessageDto> OnDelete { get; set; }
 
     private string _rawJsonPayload;
 
@@ -123,5 +124,10 @@
             return;
 
         await ClipboardService.CopyToClipboardAsync(_rawJsonPayload);
+    }
+
+    private async Task DeleteMessage()
+    {
+        await OnDelete.InvokeAsync(MessageReference);
     }
 }

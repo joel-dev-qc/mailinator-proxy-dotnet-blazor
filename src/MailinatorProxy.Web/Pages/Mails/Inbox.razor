@@ -13,12 +13,12 @@
         position: relative;
     }
 
-    .delete-button {
+    .actions-section {
         opacity: 0;
         transition: opacity 0.2s ease-in-out;
     }
 
-    tr:hover .delete-button {
+    tr:hover .actions-section {
         opacity: 1;
     }
 </style>
@@ -100,12 +100,14 @@
 
                     </MudTd>
                     <MudTd>
-                        <div @onclick:stopPropagation="true" @onclick:preventDefault="true" >
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                           Color="Color.Error"
-                                           Size="Size.Small"
-                                           Class="delete-button"
-                                           OnClick="@(e => DeleteMessage(context))" />
+                        <div class="actions-section" @onclick:stopPropagation="true" @onclick:preventDefault="true" >
+
+                            <MudTooltip Text="Delete">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               OnClick="@(e => DeleteMessage(context))" />
+                            </MudTooltip>
                         </div>
                     </MudTd>
                 </RowTemplate>
@@ -116,7 +118,7 @@
         }
         else
         {
-            <MailDetails MessageReference="_selectedMessage"/>
+            <MailDetails MessageReference="_selectedMessage" OnDelete="DeleteAndGoBack"/>
         }
 
     </MudPaper>
@@ -181,16 +183,16 @@
 
     private async Task DeleteMessage(MessageDto message)
     {
-        // Appel à l'API pour suppression (si applicable)
-        //await MailinatorApiClient.DeleteMailByIdAsync(Domain, "*", message.Id);
-
-        // UI : retirer du tableau si nécessaire
-        // remove manually from the table
-        //await _table.ReloadServerData();
-        Snackbar.Add("Message deleted successfully.", Severity.Success);
+        await MailinatorApiClient.DeleteMailByIdAsync(Domain, "*", message.Id);
+        await _table.ReloadServerData();
+        Snackbar.Add("Message deleted successfully.", Severity.Info);
     }
 
-
+    private async Task DeleteAndGoBack(MessageDto message)
+    {
+        await DeleteMessage(message);
+        GoBackToList();
+    }
 
     private void GoBackToList()
     {
