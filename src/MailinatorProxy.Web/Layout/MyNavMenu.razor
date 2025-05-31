@@ -1,4 +1,42 @@
-﻿<MudNavMenu>
+﻿@using MailinatorProxy.Web.States
+@inject DomainState DomainState
+
+<MudNavMenu>
     <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavLink Href="/inbox" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Inbox">Inbox</MudNavLink>
+
+    @if (_hasSelectedDomain)
+    {
+        <MudNavLink
+            Href="@($"/{DomainState.Current}/Inbox")"
+            Match="NavLinkMatch.All"
+            Icon="@Icons.Material.Filled.Inbox">
+            Inbox
+        </MudNavLink>
+    }
 </MudNavMenu>
+
+@code {
+    private bool _hasSelectedDomain = false;
+
+    protected override void OnInitialized()
+    {
+        DomainState.OnChanged += HandleDomainChanged;
+        UpdateDomainFlag();
+    }
+
+    private void HandleDomainChanged()
+    {
+        UpdateDomainFlag();
+        InvokeAsync(StateHasChanged); // forcer re-render
+    }
+
+    private void UpdateDomainFlag()
+    {
+        _hasSelectedDomain = !string.IsNullOrEmpty(DomainState.Current);
+    }
+
+    public void Dispose()
+    {
+        DomainState.OnChanged -= HandleDomainChanged;
+    }
+}

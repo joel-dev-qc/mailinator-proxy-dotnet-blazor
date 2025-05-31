@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Net.Http.Json;
+using MailinatorProxy.Shared.Dtos.Domains;
 using MailinatorProxy.Shared.Dtos.Mails;
 using MailinatorProxy.Shared.Enums;
 using Microsoft.AspNetCore.WebUtilities;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace MailinatorProxy.Web.ApiClients;
 
-public class MailinatorApiClient(HttpClient httpClient) : IMalinatorApiClient
+internal class MailinatorApiClient(HttpClient httpClient) : IMalinatorApiClient
 {
     public async Task<GetMailAttachmentsQueryResponse> GetMailAttachmentsAsync(string domain, string messageId)
     {
@@ -37,5 +38,10 @@ public class MailinatorApiClient(HttpClient httpClient) : IMalinatorApiClient
                 new("skip", skip?.ToString())
             });
         return await httpClient.GetFromJsonAsync<GetMailInboxQueryResponse>(url);
+    }
+
+    public Task<GetAllDomainsQueryResponse> GetAllDomainsAsync()
+    {
+        return httpClient.GetFromJsonAsync<GetAllDomainsQueryResponse>("/domains");
     }
 }

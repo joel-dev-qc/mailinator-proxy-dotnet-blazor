@@ -1,4 +1,5 @@
 ﻿@using MailinatorProxy.Web.Shared
+@using MailinatorProxy.Web.Components
 @inherits LayoutComponentBase
 
 @* Required *@
@@ -14,8 +15,7 @@
 
 <MudLayout>
     <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        My Application
+        <AppBar DrawerToggleCallback="DrawerToggle"/>
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen">
         <MyNavMenu/>

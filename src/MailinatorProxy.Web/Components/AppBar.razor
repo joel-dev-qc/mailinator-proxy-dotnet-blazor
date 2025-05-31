@@ -1,0 +1,16 @@
+<div class="d-flex align-center flex-grow-1 d-md-none">
+    <MudTooltip Delay="1000" Text="Drawer">
+        <MudIconButton OnClick="DrawerToggleCallback" Icon="@Icons.Material.Rounded.Notes" Color="Color.Inherit" Edge="Edge.Start" aria-label="Open drawer" />
+    </MudTooltip>
+    <MudSpacer />
+    <NavLink class="d-flex flex-nowrap align-center" href="home">
+        @* LOGO HERE *@
+        <MudText Typo="Typo.h5" Style="color:white;" Class="">Mail Client</MudText>
+    </NavLink>
+    <MudSpacer />
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<MouseEventArgs> DrawerToggleCallback { get; set; }
+}
