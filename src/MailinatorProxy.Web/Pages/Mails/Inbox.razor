@@ -1,9 +1,11 @@
 @page "/{Domain}/Inbox"
+@page "/{Domain}/Inbox/{MailId}"
 @using MailinatorProxy.Shared.Dtos.Mails
 @using MailinatorProxy.Web.ApiClients
 @using MailinatorProxy.Web.Components
 @using MailinatorProxy.Web.Extensions
 @inject IMalinatorApiClient MailinatorApiClient
+@inject NavigationManager NavigationManager
 
 <PageHeader PageTitle="Inbox" BreadcrumbItems="@(new List<BreadcrumbItem>
                                               {
@@ -18,7 +20,7 @@
 
 
     <MudPaper>
-        <div class="pa-4">
+        <div class="pa-2">
             @if (_isModeViewDetails)
             {
                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
@@ -36,84 +38,85 @@
 
         </div>
 
+        @if (_selectedMessage is null)
+        {
+            <MudTable ServerData="ServerReload"
+                      Hover="true"
+                      @ref="_table"
+                      Elevation="2"
+                      T="MessageDto"
+                      RowClass="cursor-pointer"
+                      OnRowClick="OnSelectMessageEvent">
+
+                <HeaderContent>
+                    <MudTh>
+                        From
+                    </MudTh>
+                    <MudTh>
+                        Subject
+                    </MudTh>
+                    <MudTh>
+                        To
+                    </MudTh>
+                    <MudTh>
+                        Date
+                    </MudTh>
+
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd Class="align-content-start">
+
+                        <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
+                    </MudTd>
+                    <MudTd Class="align-content-start">
+                        <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
+                    </MudTd>
+                    <MudTd Class="align-content-start">
+                        <MudText Typo="Typo.body1" Class="bold">@($"{context.To}@{context.Domain}")</MudText>
+                    </MudTd>
+
+                    <MudTd Class="align-content-start">
+                        <MudText Typo="Typo.body1" Class="bold">
+                            <RelativeDate Date="@context.Time.ToDateTime()"/>
+                        </MudText>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager/>
+                </PagerContent>
+            </MudTable>
+        }
+        else
+        {
+            <MailDetails MessageReference="_selectedMessage"/>
+        }
+
     </MudPaper>
 
-    @if (_selectedMessage is null)
-    {
-        <MudTable ServerData="ServerReload"
-                  Hover="true"
-                  @ref="_table"
-                  Elevation="2"
-                  T="MessageDto"
-                  RowClass="cursor-pointer"
-                  OnRowClick="OnSelectMessageEvent">
 
-            <HeaderContent>
-                <MudTh>
-                    From
-                </MudTh>
-                <MudTh>
-                    Subject
-                </MudTh>
-                <MudTh>
-                    To
-                </MudTh>
-                <MudTh>
-                    Date
-                </MudTh>
-
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd Class="align-content-start">
-
-                    <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
-                </MudTd>
-                <MudTd Class="align-content-start">
-                    <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
-                </MudTd>
-                <MudTd Class="align-content-start">
-                    <MudText Typo="Typo.body1" Class="bold">@($"{context.To}@{context.Domain}")</MudText>
-                </MudTd>
-
-                <MudTd Class="align-content-start">
-                    <MudText Typo="Typo.body1" Class="bold">
-                        <RelativeDate Date="@context.Time.ToDateTime()"/>
-                    </MudText>
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager/>
-            </PagerContent>
-        </MudTable>
-    }
-    else
-    {
-        <MudPaper Class="">
-            <div class="pa-4">
-                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="GoBackToList"/>
-                    <MudText Typo="Typo.h6">Message Details</MudText>
-                </MudStack>
-            </div>
-            <MudDivider Class="my-2"/>
-            <MailDetails MessageReference="_selectedMessage"/>
-        </MudPaper>
-    }
 
 </DomainGuard>
 
 @code {
     [Parameter]
     public string Domain { get; set; } = string.Empty;
+    [Parameter]
+    public string? MailId { get; set; }
 
     private MudTable<MessageDto> _table;
     private bool _isLoading = true;
     private MessageDto? _selectedMessage;
     private bool _isModeViewDetails = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         _isLoading = false;
+
+        if (!string.IsNullOrEmpty(MailId) && _selectedMessage == null)
+        {
+            await LoadMailDetails(MailId);
+            _isModeViewDetails = true;
+        }
     }
 
 
@@ -132,6 +135,9 @@
     {
         var response = await MailinatorApiClient.GetMailByIdAsync("private", "*", messageId);
         _selectedMessage = response.Message;
+
+        var newPath = $"/{Domain}/Inbox/{messageId}";
+        NavigationManager.NavigateTo(newPath, replace: false);
     }
 
     private async Task OnSelectMessageEvent(TableRowClickEventArgs<MessageDto> selectedMessage)
@@ -147,6 +153,10 @@
     private void GoBackToList()
     {
         _selectedMessage = null;
+        _isModeViewDetails = false;
+
+        var basePath = $"/{Domain}/Inbox";
+        NavigationManager.NavigateTo(basePath, replace: false);
     }
 
 }
