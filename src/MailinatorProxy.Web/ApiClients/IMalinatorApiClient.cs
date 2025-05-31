@@ -14,4 +14,5 @@ internal interface IMalinatorApiClient
     Task<GetMailByIdQueryResponse> GetMailByIdAsync(string domain, string inbox, string messageId);
     Task<GetMailInboxQueryResponse> GetMailInboxAsync(string domain, string inbox, bool decodeSubject = false, SortingDirection? sort = null, int? limit = null, int? skip = null);
     Task<GetAllDomainsQueryResponse> GetAllDomainsAsync();
+    Task<DeleteMailByIdCommandResponse> DeleteMailByIdAsync(string domain, string inbox, string messageId);
 }

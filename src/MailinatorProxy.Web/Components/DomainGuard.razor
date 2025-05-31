@@ -28,8 +28,15 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        if (_isValid && DomainState.Current == Domain)
+        {
+            _isChecking = false;
+            return;
+        }
+
+
         _isChecking = true;
-        await Task.Delay(2000);
+        await Task.Delay(200);
         if (await DomainService.IsValidAsync(Domain))
         {
             _isValid = true;

@@ -44,4 +44,9 @@ internal class MailinatorApiClient(HttpClient httpClient) : IMalinatorApiClient
     {
         return httpClient.GetFromJsonAsync<GetAllDomainsQueryResponse>("/domains");
     }
+
+    public Task<DeleteMailByIdCommandResponse> DeleteMailByIdAsync(string domain, string inbox, string messageId)
+    {
+        return httpClient.DeleteFromJsonAsync<DeleteMailByIdCommandResponse>($"/mails/{domain}/{inbox}/{messageId}");
+    }
 }
