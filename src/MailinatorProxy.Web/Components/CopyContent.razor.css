@@ -1,0 +1,11 @@
+.copy-button {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+}
+
+.copy-container:hover .copy-button,
+.copy-button:focus {
+    opacity: 1;
+    pointer-events: auto;
+}

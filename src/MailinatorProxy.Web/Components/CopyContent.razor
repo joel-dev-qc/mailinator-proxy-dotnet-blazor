@@ -1,0 +1,25 @@
+@using MailinatorProxy.Web.Services
+@inject IClipboardService ClipboardService
+
+<div class="d-flex align-center copy-container" style="position: relative">
+    <div>
+        @ChildContent
+    </div>
+    <MudIconButton Class="copy-button" Icon="@Icons.Material.Filled.ContentCopy" OnClick="OnCopyContent"/>
+</div>
+
+
+@code {
+    [Parameter] public string Content { get; set; } = string.Empty;
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+
+    private async Task OnCopyContent()
+    {
+        if (!string.IsNullOrEmpty(Content))
+        {
+            await ClipboardService.CopyToClipboardAsync(Content);
+        }
+    }
+}

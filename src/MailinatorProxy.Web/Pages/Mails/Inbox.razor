@@ -10,24 +10,6 @@
 @inject ISnackbar Snackbar
 @inject IMailReadStateService MailReadStateService
 
-<style>
-    .row-hover-actions {
-        position: relative;
-    }
-
-    .actions-section {
-        opacity: 0;
-        transition: opacity 0.2s ease-in-out;
-    }
-
-    tr:hover .actions-section {
-        opacity: 1;
-    }
-
-    .unread-row td * {
-        font-weight: bold!important;
-    }
-</style>
 
 <PageHeader PageTitle="Inbox" BreadcrumbItems="@(new List<BreadcrumbItem>
                                               {
@@ -38,9 +20,6 @@
 
 
 <DomainGuard Domain="@Domain">
-
-
-
     <MudPaper>
         <div class="pa-2">
             @if (_isModeViewDetails)
@@ -70,47 +49,28 @@
                       RowClassFunc="GetRowClass"
                       OnRowClick="OnSelectMessageEvent">
 
-                <HeaderContent>
-                    <MudTh>
-                        From
-                    </MudTh>
-                    <MudTh>
-                        Subject
-                    </MudTh>
-                    <MudTh>
-                        To
-                    </MudTh>
-                    <MudTh>
-                        Date
-                    </MudTh>
-                    <MudTh></MudTh>
-                </HeaderContent>
                 <RowTemplate>
                     <MudTd Class="align-content-start">
 
                         <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
                     </MudTd>
+
                     <MudTd Class="align-content-start">
+                        <MailToLabel Domain="@context.Domain" Identifier="@context.To" />
                         <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
-                    </MudTd>
-                    <MudTd Class="align-content-start">
-                        <MudText Typo="Typo.body1" Class="bold">@($"{context.To}@{context.Domain}")</MudText>
                     </MudTd>
 
                     <MudTd Class="align-content-start">
                         <MudText Typo="Typo.body1" Class="bold">
                             <RelativeDate Date="@context.Time.ToDateTime()"/>
                         </MudText>
-
-
-
                     </MudTd>
-                    <MudTd>
-                        <div class="actions-section" @onclick:stopPropagation="true" @onclick:preventDefault="true" >
 
+                    <MudTd Class="align-content-start">
+                        <div class="d-flex justify-end">
                             <MudTooltip Text="Delete">
                                 <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                               Color="Color.Error"
+                                               Color="Color.Default"
                                                Size="Size.Small"
                                                OnClick="@(e => DeleteMessage(context))" />
                             </MudTooltip>
@@ -128,9 +88,6 @@
         }
 
     </MudPaper>
-
-
-
 </DomainGuard>
 
 @code {

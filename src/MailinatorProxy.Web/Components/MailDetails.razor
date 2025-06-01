@@ -5,7 +5,6 @@
 @using MailinatorProxy.Web.Extensions
 @using HighlightBlazor;
 @using MailinatorProxy.Web.Services
-@inject IMalinatorApiClient MailinatorApiClient
 @inject IClipboardService ClipboardService
 @inject NavigationManager NavigationManager
 
@@ -13,11 +12,9 @@
 {
     <MudPaper Elevation="0">
         <div class="pa-4">
-            <div class="d-flex align-center">
+            <div class="d-flex flex-wrap align-center mb-4">
+                <MailToLabel Domain="@MessageReference.Domain" Identifier="@MessageReference.To" Size="Size.Medium"  />
                 <MudText Typo="Typo.h5">@MessageReference.Subject</MudText>
-                <MudChip Class="ml-2" T="string" Label="true" Size="Size.Small" >
-                    @MessageReference.To
-                </MudChip>
             </div>
 
             <MudStack
