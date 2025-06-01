@@ -45,7 +45,11 @@
         <MudTabs Border="true">
             <MudTabPanel Text="Email" Icon="@Icons.Material.Filled.Email">
                 <div class="pa-4">
-                    @((MarkupString)GetBody())
+                    <iframe
+                        srcdoc="@GetBody()"
+                        sandbox="allow-same-origin"
+                        style="width: 100%; height: 60vh; border: none; display: block;"
+                    ></iframe>
                 </div>
             </MudTabPanel>
             <MudTabPanel Text="JSON" Icon="@Icons.Material.Filled.Code">
@@ -97,6 +101,7 @@
         foreach (var link in links)
         {
             link.SetAttributeValue("target", "_blank");
+            link.SetAttributeValue("rel", "noopener noreferrer");
         }
 
         return htmlDoc.DocumentNode.OuterHtml;
