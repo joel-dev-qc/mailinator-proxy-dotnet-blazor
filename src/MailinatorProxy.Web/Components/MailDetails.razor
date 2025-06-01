@@ -1,6 +1,5 @@
 @using MailinatorProxy.Shared.Dtos.Mails
 @using MailinatorProxy.Shared.Extensions
-@using MailinatorProxy.Web.ApiClients
 @using System.Text.Json
 @using MailinatorProxy.Web.Extensions
 @using HighlightBlazor;
@@ -13,7 +12,7 @@
     <MudPaper Elevation="0">
         <div class="pa-4">
             <div class="d-flex flex-wrap align-center mb-4">
-                <MailToLabel Domain="@MessageReference.Domain" Identifier="@MessageReference.To" Size="Size.Medium"  />
+                <MailToLabel FullEmail="@($"{MessageReference.To}@{Domain}")" Identifier="@MessageReference.To" Size="Size.Medium"  />
                 <MudText Typo="Typo.h5">@MessageReference.Subject</MudText>
             </div>
 
@@ -71,6 +70,7 @@
 @code {
     [Parameter, EditorRequired] public MessageDto MessageReference { get; set; }
     [Parameter, EditorRequired] public EventCallback<MessageDto> OnDelete { get; set; }
+    [Parameter, EditorRequired] public string Domain { get; set; } = string.Empty;
 
     private string _rawJsonPayload;
 

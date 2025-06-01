@@ -56,8 +56,12 @@
                     </MudTd>
 
                     <MudTd Class="align-content-start">
-                        <MailToLabel Domain="@context.Domain" Identifier="@context.To" />
-                        <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
+                        <div class="d-flex flex-wrap">
+
+                            <MailToLabel FullEmail="@($"{context.To}@{context.Domain}")" Identifier="@context.To"
+                                         Size="Size.Small" Class="mr-2" Style="margin-top:-1px;"/>
+                            <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
+                        </div>
                     </MudTd>
 
                     <MudTd Class="align-content-start">
@@ -84,7 +88,7 @@
         }
         else
         {
-            <MailDetails MessageReference="_selectedMessage" OnDelete="DeleteAndGoBack"/>
+            <MailDetails MessageReference="_selectedMessage" OnDelete="DeleteAndGoBack" Domain="@Domain"/>
         }
 
     </MudPaper>
