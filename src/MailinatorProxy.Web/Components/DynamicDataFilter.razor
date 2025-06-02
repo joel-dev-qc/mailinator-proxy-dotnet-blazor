@@ -1,0 +1,184 @@
+<!-- DynamicDataFilters.razor -->
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.Extensions.Primitives
+@implements IDisposable
+@inject NavigationManager NavigationManager
+
+<EditForm EditContext="_editContext" class="flex-grow-1">
+    <div class="d-flex align-center gap-2">
+        @ChildContent
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public required RenderFragment ChildContent { get; set; }
+    [Parameter] public required object Model { get; set; }
+    [Parameter] public required EventCallback OnFiltersChanged { get; set; }
+    [Parameter] public int DebounceDelay { get; set; } = 300;
+
+    private EditContext _editContext = null!;
+    private CancellationTokenSource _cts = new();
+
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(Model);
+
+        RestoreFiltersFromQueryString();
+
+        _editContext.OnFieldChanged += OnFieldChanged;
+    }
+
+    public void NotifyChanged(string propertyName)
+    {
+        _editContext.NotifyFieldChanged(new FieldIdentifier(Model, propertyName));
+    }
+
+    private void OnFieldChanged(object? sender, FieldChangedEventArgs e)
+    {
+        // Appeler une méthode auxiliaire qui gère les exceptions
+        _ = HandleFieldChangeAsync();
+    }
+
+    private async Task HandleFieldChangeAsync()
+    {
+        await _cts.CancelAsync(); // Annuler les appels précédents
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            // Délai pour éviter les appels redondants
+            await Task.Delay(DebounceDelay, _cts.Token);
+
+            UpdateQueryString();
+
+            if (OnFiltersChanged.HasDelegate)
+            {
+                await OnFiltersChanged.InvokeAsync();
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignorer les tâches annulées
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in HandleFieldChangeAsync: {ex}");
+            throw;
+        }
+    }
+
+    private void UpdateQueryString()
+    {
+        var query = new Dictionary<string, object?>();
+
+        foreach (var property in Model.GetType().GetProperties())
+        {
+            var value = property.GetValue(Model);
+
+            if (value is IEnumerable<int> collection && collection.Any())
+            {
+                // Ajouter les collections non vides
+                query[property.Name] = string.Join(",", collection);
+            }
+            else if (value is int intValue && intValue != 0)
+            {
+                // Ajouter les entiers non nuls (exclure les 0 par défaut)
+                query[property.Name] = intValue.ToString();
+            }
+            else if (IsNullableInt(value, out var nullableInt))
+            {
+                // Ajouter les entiers nullable qui ont une valeur non nulle
+                query[property.Name] = nullableInt.Value.ToString();
+            }
+            else if (value is string strValue && !string.IsNullOrWhiteSpace(strValue))
+            {
+                // Ajouter les chaînes non nulles et non vides
+                query[property.Name] = strValue;
+            }
+            else
+            {
+                // THAT will force the removal of the query string parameter.
+                query[property.Name] = null;
+            }
+        }
+
+        // Refresh the page without an entire refresh.
+        var newUri = NavigationManager.GetUriWithQueryParameters(query);
+        var currentUri = NavigationManager.Uri;
+
+        // Navigate to the page only if the URL has changed.
+        if (!string.Equals(newUri, currentUri, StringComparison.OrdinalIgnoreCase))
+        {
+            NavigationManager.NavigateTo(newUri, forceLoad: false);
+        }
+        return;
+
+        bool IsNullableInt(object? value, out int? nullableIntValue)
+        {
+            if (value is int?)
+            {
+                var nullableInt = (int?)value;
+                if(nullableInt.HasValue && nullableInt.Value != 0)
+                {
+                    nullableIntValue = nullableInt;
+                    return true;
+                }
+            }
+
+            nullableIntValue = null;
+            return false;
+        }
+    }
+
+    private void RestoreFiltersFromQueryString()
+    {
+        var queryParams = QueryHelpers.ParseQuery(new Uri(NavigationManager.Uri).Query);
+
+        foreach (var property in Model.GetType().GetProperties())
+        {
+            if (queryParams.TryGetValue(property.Name, out var stringValue) && !StringValues.IsNullOrEmpty(stringValue))
+            {
+                var value = stringValue.ToString(); // Convertir en chaîne simple
+
+                try
+                {
+                    if (property.PropertyType == typeof(IEnumerable<int>))
+                    {
+                        // Convertir une chaîne séparée par des virgules en une liste d'entiers
+                        property.SetValue(Model, value.Split(',').Select(int.Parse).ToList());
+                    }
+                    else if (property.PropertyType == typeof(int?))
+                    {
+                        // Convertir en entier nullable
+                        property.SetValue(Model, int.TryParse(value, out var intValue) ? intValue : null);
+                    }
+                    else if (property.PropertyType == typeof(int))
+                    {
+                        // Convertir en entier non-nullable
+                        if (int.TryParse(value, out var intValue))
+                        {
+                            property.SetValue(Model, intValue);
+                        }
+                    }
+                    else
+                    {
+                        // Convertir en chaîne ou autre type simple
+                        property.SetValue(Model, value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing query parameter '{property.Name}': {ex.Message}");
+                }
+            }
+        }
+    }
+
+
+    public void Dispose()
+    {
+        _editContext.OnFieldChanged -= OnFieldChanged;
+        _cts.Dispose();
+    }
+}

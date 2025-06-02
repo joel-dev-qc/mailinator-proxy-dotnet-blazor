@@ -11,6 +11,8 @@ internal class MailToFavoriteState(ILocalStorageService localStorage)
 
     public event Action<string, string>? OnFavoriteChanged;
 
+    public event Action<string>? OnChanged;
+
     public async Task InitializeAsync(string domain)
     {
         if (_favoritesByDomain.ContainsKey(domain)) return;
@@ -18,6 +20,17 @@ internal class MailToFavoriteState(ILocalStorageService localStorage)
         var favorites = await localStorage.GetItemAsync<HashSet<string>>(GetKey(domain)) ?? [];
 
         _favoritesByDomain[domain] = favorites;
+    }
+
+    public IReadOnlyCollection<string> GetAllFavorites(string domain)
+    {
+        Console.WriteLine("Fetching favorites for domain: " + domain);
+        if (!_favoritesByDomain.ContainsKey(domain))
+        {
+            Console.WriteLine("No favorites found for domain: " + domain);
+            return [];
+        }
+        return _favoritesByDomain.TryGetValue(domain, out var set) ? set : [];
     }
 
     public bool IsFavorite(string domain, string id) =>
@@ -37,6 +50,7 @@ internal class MailToFavoriteState(ILocalStorageService localStorage)
         await localStorage.SetItemAsync(GetKey(domain), set);
 
         OnFavoriteChanged?.Invoke(domain, id);
+        OnChanged?.Invoke(domain);
     }
 
     private static string GetKey(string domain) => $"favorites:{domain}";

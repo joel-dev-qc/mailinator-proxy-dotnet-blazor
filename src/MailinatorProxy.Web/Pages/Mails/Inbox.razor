@@ -1,14 +1,17 @@
 @page "/{Domain}/Inbox"
 @page "/{Domain}/Inbox/{MailId}"
+@using System.Reflection.Metadata
 @using MailinatorProxy.Shared.Dtos.Mails
 @using MailinatorProxy.Web.ApiClients
 @using MailinatorProxy.Web.Components
 @using MailinatorProxy.Web.Extensions
 @using MailinatorProxy.Web.Services
+@using MailinatorProxy.Web.States
 @inject IMalinatorApiClient MailinatorApiClient
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 @inject IMailReadStateService MailReadStateService
+@inject MailToFavoriteState MailToFavoriteState
 
 
 <PageHeader PageTitle="Inbox" BreadcrumbItems="@(new List<BreadcrumbItem>
@@ -34,7 +37,31 @@
                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="_table.ReloadServerData"/>
 
+                    <MudSpacer/>
+
+                    <DynamicDataFilter @ref="_dynamicDataFilter" Model="_inboxFilters" OnFiltersChanged="() => _table.ReloadServerData()">
+                        @foreach(var favorite in _mailToFavorites)
+                        {
+                            <MudChip T="string"
+                                     OnClick="() => OnInboxToFiltersChanged(favorite)"
+                            >@favorite</MudChip>
+                        }
+
+                        <MudTextField @bind-Value="_inboxFilters.To"
+                                      For="() => _inboxFilters.To"
+                                      T="string?"
+                                      Label="MailTo"
+                                      Margin="Margin.Dense"
+                                      Variant="Variant.Outlined"
+                                      @onfocusout="@(() => _inboxFilters.To = GetCurrentIdentifier())"
+                                      AdornmentIcon="@Icons.Material.Filled.Undo"
+                                      Adornment="@(_inboxFilters.To != "*" ? Adornment.End : Adornment.None)"
+                                      AdornmentAriaLabel="All inboxes"
+                                      OnAdornmentClick="@(() => OnInboxToFiltersChanged("*"))"
+                        ></MudTextField>
+                    </DynamicDataFilter>
                 </MudStack>
+
             }
 
 
@@ -102,15 +129,23 @@
     public string Domain { get; set; } = string.Empty;
     [Parameter]
     public string? MailId { get; set; }
-
-    private string _inbox;
-    private List<string> _favorites = [];
+    private List<string> _mailToFavorites = [];
+    private InboxFilters _inboxFilters = new();
 
     private MudTable<MessageDto> _table;
     private bool _isLoading = true;
     private MessageDto? _selectedMessage;
     private bool _isModeViewDetails = false;
     private Dictionary<string, bool> _readStates = new();
+    private DynamicDataFilter _dynamicDataFilter;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await MailToFavoriteState.InitializeAsync(Domain);
+        RefreshMailToFavorites();
+        MailToFavoriteState.OnChanged += HandleOnFavoriteChanged;
+    }
 
 
     protected override async Task OnParametersSetAsync()
@@ -127,9 +162,9 @@
 
     private async Task<TableData<MessageDto>> ServerReload(TableState state, CancellationToken token)
     {
-        var result = await MailinatorApiClient.GetMailInboxAsync(Domain, "*");
+        var result = await MailinatorApiClient.GetMailInboxAsync(Domain, GetCurrentIdentifier());
 
-        _readStates = new();
+        _readStates = new Dictionary<string, bool>();
         foreach (var msg in result.Messages)
         {
             _readStates[msg.Id] = await MailReadStateService.IsReadAsync(Domain, msg.Id);
@@ -146,7 +181,7 @@
     {
         await MailReadStateService.MarkAsReadAsync(Domain, messageId);
 
-        var response = await MailinatorApiClient.GetMailByIdAsync(Domain, "*", messageId);
+        var response = await MailinatorApiClient.GetMailByIdAsync(Domain, GetCurrentIdentifier(), messageId);
         _selectedMessage = response.Message;
         _isModeViewDetails = true;
 
@@ -166,7 +201,7 @@
 
     private async Task DeleteMessage(MessageDto message)
     {
-        await MailinatorApiClient.DeleteMailByIdAsync(Domain, "*", message.Id);
+        await MailinatorApiClient.DeleteMailByIdAsync(Domain, GetCurrentIdentifier(), message.Id);
         await MailReadStateService.RemoveAsync(Domain, message.Id);
         await _table.ReloadServerData();
         Snackbar.Add("Message deleted successfully.", Severity.Info);
@@ -195,6 +230,41 @@
             : string.Empty;
 
         return $"cursor-pointer {readClass}";
+    }
+
+
+    private void HandleOnFavoriteChanged(string identifier)
+    {
+        RefreshMailToFavorites();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshMailToFavorites()
+    {
+        Console.WriteLine("Refreshing favorites for domain: " + Domain);
+        _mailToFavorites = MailToFavoriteState.GetAllFavorites(Domain).ToList();
+        Console.WriteLine("Current favorites: " + string.Join(", ", _mailToFavorites));
+    }
+
+    private void OnInboxToFiltersChanged(string mailTo)
+    {
+        _inboxFilters.To = mailTo;
+        _dynamicDataFilter.NotifyChanged(nameof(InboxFilters.To));
+    }
+
+    public void Dispose()
+    {
+        MailToFavoriteState.OnChanged -= HandleOnFavoriteChanged;
+    }
+
+    private string GetCurrentIdentifier()
+    {
+        return string.IsNullOrEmpty(_inboxFilters.To) ? "*" : _inboxFilters.To;
+    }
+
+    private class InboxFilters
+    {
+        public string To { get; set; } = "*"; // Default to all inboxes
     }
 
 }
