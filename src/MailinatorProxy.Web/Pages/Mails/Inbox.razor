@@ -33,6 +33,7 @@
             {
                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="_table.ReloadServerData"/>
+
                 </MudStack>
             }
 
@@ -71,12 +72,14 @@
                     </MudTd>
 
                     <MudTd Class="align-content-start">
-                        <div class="d-flex justify-end">
+                        <div class="d-flex justify-end gap-2">
+
+                            <SetMailFavorite Domain="@context.Domain" Identifier="@context.To" Size="Size.Small" />
                             <MudTooltip Text="Delete">
                                 <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                                Color="Color.Default"
                                                Size="Size.Small"
-                                               OnClick="@(e => DeleteMessage(context))" />
+                                               OnClick="@(e => DeleteMessage(context))"/>
                             </MudTooltip>
                         </div>
                     </MudTd>
@@ -99,6 +102,9 @@
     public string Domain { get; set; } = string.Empty;
     [Parameter]
     public string? MailId { get; set; }
+
+    private string _inbox;
+    private List<string> _favorites = [];
 
     private MudTable<MessageDto> _table;
     private bool _isLoading = true;

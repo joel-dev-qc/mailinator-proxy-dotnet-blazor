@@ -31,12 +31,16 @@
         <div class="d-flex">
             <MudSpacer/>
             <MudToolBar>
-                <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="DeleteMessage"/>
+                <SetMailFavorite Domain="@Domain" Identifier="@MessageReference.To" />
+
+                <MudTooltip Text="Delete">
+                    <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="DeleteMessage"/>
+                </MudTooltip>
                 <MudMenu Icon="@Icons.Material.Filled.MoreVert"
                          AriaLabel="Open user menu">
-                    <MudMenuItem Label="Copy ID" Icon="@Icons.Material.Filled.ContentCopy" OnClick="CopyIdToClipboard" />
-                    <MudMenuItem Label="Copy URL" Icon="@Icons.Material.Filled.Link" OnClick="CopyUrlToClipboard" />
-                    <MudMenuItem Label="Copy JSON" Icon="@Icons.Material.Filled.Code" OnClick="CopyJsonToClipboard" />
+                    <MudMenuItem Label="Copy ID" Icon="@Icons.Material.Filled.ContentCopy" OnClick="CopyIdToClipboard"/>
+                    <MudMenuItem Label="Copy URL" Icon="@Icons.Material.Filled.Link" OnClick="CopyUrlToClipboard"/>
+                    <MudMenuItem Label="Copy JSON" Icon="@Icons.Material.Filled.Code" OnClick="CopyJsonToClipboard"/>
                 </MudMenu>
             </MudToolBar>
         </div>

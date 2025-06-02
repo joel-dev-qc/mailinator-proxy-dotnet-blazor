@@ -1,0 +1,43 @@
+@using MailinatorProxy.Web.States
+@inject MailToFavoriteState FavoriteState
+
+<MudTooltip Text="@(_isFavorite ? "Retirer des favoris" : "Ajouter aux favoris")">
+    <MudIconButton
+        Size="@Size"
+        Icon="@(_isFavorite ? Icons.Material.Filled.Star : Icons.Material.Outlined.StarBorder)"
+                   Color="@(_isFavorite ? Color.Warning : Color.Default)"
+                   OnClick="ToggleFavorite" />
+</MudTooltip>
+
+@code {
+    [Parameter, EditorRequired] public string Identifier { get; set; } = null!;
+    [Parameter, EditorRequired] public string Domain { get; set; } = null!;
+    [Parameter] public Size Size { get; set; } = Size.Medium;
+
+    private bool _isFavorite;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FavoriteState.InitializeAsync(Domain);
+        _isFavorite = FavoriteState.IsFavorite(Domain, Identifier);
+
+        FavoriteState.OnFavoriteChanged += HandleFavoriteChanged;
+    }
+
+    private async Task ToggleFavorite()
+    {
+        await FavoriteState.ToggleFavoriteAsync(Domain, Identifier);
+    }
+
+    private void HandleFavoriteChanged(string domain, string id)
+    {
+        if (domain != Domain || id != Identifier) return;
+        _isFavorite = FavoriteState.IsFavorite(domain, id);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        FavoriteState.OnFavoriteChanged -= HandleFavoriteChanged;
+    }
+}
