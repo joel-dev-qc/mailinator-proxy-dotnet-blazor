@@ -1,0 +1,31 @@
+@using MailinatorProxy.Web.Models
+@using MailinatorProxy.Web.Services
+@inject ILayoutService LayoutService
+
+
+@*<MudTooltip Delay="500" Text="Language">
+    <CultureSelectionAppBarMenu />
+</MudTooltip>*@
+<MudTooltip Delay="500" Text="@(DarkLightModeButtonText)">
+    <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@LayoutService.CycleDarkLightModeAsync" aria-label="@(DarkLightModeButtonText)" />
+</MudTooltip>
+
+
+@code{
+
+    public string DarkLightModeButtonText => LayoutService.CurrentDarkLightMode switch
+    {
+        DarkLightMode.Dark => "System mode",
+        DarkLightMode.Light => "Dark mode",
+        _ => "Light mode"
+    };
+
+    public string DarkLightModeButtonIcon => LayoutService.CurrentDarkLightMode switch
+    {
+        DarkLightMode.Dark => Icons.Material.Rounded.AutoMode,
+        DarkLightMode.Light => Icons.Material.Outlined.DarkMode,
+        _ => Icons.Material.Filled.LightMode
+    };
+
+
+}

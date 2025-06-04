@@ -21,6 +21,8 @@ builder.Services.AddMudServices(config =>
 builder.Services.AddScoped<IClipboardService, ClipboardService>();
 builder.Services.AddScoped<IDomainService, DomainService>();
 builder.Services.AddScoped<IMailReadStateService, MailReadStateService>();
+builder.Services.AddScoped<ILayoutService, LayoutService>();
+builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 builder.Services.AddScoped<DomainState>();
 builder.Services.AddScoped<MailToFavoriteState>();
 builder.Services.AddHighlight();

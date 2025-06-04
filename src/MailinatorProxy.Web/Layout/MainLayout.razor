@@ -1,9 +1,16 @@
 ﻿@using MailinatorProxy.Web.Shared
 @using MailinatorProxy.Web.Components
+@using MailinatorProxy.Web.Services
 @inherits LayoutComponentBase
+@inject ILayoutService LayoutService
 
 @* Required *@
-<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="_customTheme"/>
+<MudThemeProvider
+    @ref="@_mudThemeProvider"
+    IsDarkMode="@LayoutService.IsDarkMode"
+    IsDarkModeChanged="LayoutService.SetDarkMode"
+    ObserveSystemThemeChange="LayoutService.ObserveSystemThemeChange"
+    Theme="@LayoutService.CurrentTheme"/>
 <MudPopoverProvider />
 
 @* Needed for dialogs *@
@@ -18,6 +25,13 @@
         <AppBar DrawerToggleCallback="DrawerToggle"/>
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen">
+        <div class="d-block d-md-none">
+            <MudToolBar Dense="true" Gutters="false" Class="docs-gray-bg">
+                <MudIconButton Icon="@Icons.Material.Rounded.Close" Color="Color.Inherit" OnClick="DrawerToggle" aria-label="Toggle drawer"/>
+                <MudSpacer/>
+                <AppbarButtons/>
+            </MudToolBar>
+        </div>
         <MyNavMenu/>
     </MudDrawer>
     <MudMainContent Class="mt-16 pa-4">
@@ -29,7 +43,12 @@
     bool _drawerOpen = true;
     private bool _isDarkMode;
     private MudThemeProvider _mudThemeProvider;
-    private CustomTheme _customTheme = new CustomTheme();
+
+    protected override void OnInitialized()
+    {
+        LayoutService.MajorUpdateOccurred += LayoutServiceOnMajorUpdateOccured;
+        LayoutService.SetBaseTheme(new CustomTheme());
+    }
 
     void DrawerToggle()
     {
@@ -40,15 +59,27 @@
     {
         if (firstRender)
         {
+            await ApplyUserPreferences();
             await _mudThemeProvider.WatchSystemPreference(OnSystemPreferenceChanged);
             StateHasChanged();
         }
     }
 
-    private Task OnSystemPreferenceChanged(bool newValue)
+    private async Task ApplyUserPreferences()
     {
-        _isDarkMode = newValue;
-        StateHasChanged();
-        return Task.CompletedTask;
+        var defaultDarkMode = await _mudThemeProvider.GetSystemPreference();
+        await LayoutService.ApplyUserPreferences(defaultDarkMode);
+    }
+
+    private async Task OnSystemPreferenceChanged(bool newValue)
+    {
+        await LayoutService.OnSystemPreferenceChanged(newValue);
+    }
+
+    private void LayoutServiceOnMajorUpdateOccured(object sender, EventArgs e) => StateHasChanged();
+
+    public void Dispose()
+    {
+        LayoutService.MajorUpdateOccurred -= LayoutServiceOnMajorUpdateOccured;
     }
 }

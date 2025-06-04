@@ -3,11 +3,27 @@
         <MudIconButton OnClick="DrawerToggleCallback" Icon="@Icons.Material.Rounded.Notes" Color="Color.Inherit" Edge="Edge.Start" aria-label="Open drawer" />
     </MudTooltip>
     <MudSpacer />
-    <NavLink class="d-flex flex-nowrap align-center" href="home">
+    <NavLink class="d-flex flex-nowrap align-center" href="">
         @* LOGO HERE *@
         <MudText Typo="Typo.h5" Style="color:white;" Class="">Mail Client</MudText>
     </NavLink>
     <MudSpacer />
+</div>
+
+<div class="d-none d-md-flex align-center flex-grow-1">
+    <MudTooltip Delay="1000" Text="Drawer">
+        <MudIconButton OnClick="DrawerToggleCallback" Icon="@Icons.Material.Rounded.Notes" Color="Color.Inherit" Edge="Edge.Start" aria-label="Open drawer" />
+    </MudTooltip>
+    <NavLink class="d-flex flex-nowrap me-4 align-center" href="">
+        @* LOGO HERE *@
+        <MudText Typo="Typo.h5" Style="color:white;" Class="docs-brand-text">Mail Client</MudText>
+    </NavLink>
+
+
+    <MudSpacer/>
+
+    <AppbarButtons />
+
 </div>
 
 @code {

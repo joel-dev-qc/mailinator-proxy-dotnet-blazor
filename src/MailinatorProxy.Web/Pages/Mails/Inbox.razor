@@ -43,7 +43,7 @@
                 {
                     <MudChip T="string"
                              Size="Size.Medium"
-                             OnClose="@(() => Console.WriteLine("test"))"
+                             OnClose="@(() => MailToFavoriteState.ToggleFavoriteAsync(Domain, favorite))"
                              CloseIcon="@Icons.Material.Filled.Close"
                              Icon="@Icons.Material.Filled.Star"
                              OnClick="() => OnInboxToFiltersChanged(favorite)">@favorite</MudChip>
