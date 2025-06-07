@@ -6,6 +6,7 @@
 @inject IMalinatorApiClient MailinatorApiClient
 @inject InboxFilterState InboxFilterState
 @inject InboxFavoriteState InboxFavoriteState
+@inject IMailReadStateService MailReadStateService
 @inject ISnackbar Snackbar
 
 <DynamicDataFilter @ref="_dynamicDataFilter" Model="_inboxFilters" OnFiltersChanged="ReloadData">
@@ -97,6 +98,7 @@
 @code {
     [Parameter] public string Domain { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> OnSelectMessage { get; set; }
+    [Parameter] public EventCallback<MessageDto> OnDeleteMessage { get; set; }
 
     private MudTable<MessageDto> _table;
     private DynamicDataFilter _dynamicDataFilter;
@@ -118,10 +120,10 @@
     {
         var result = await MailinatorApiClient.GetMailInboxAsync(Domain, GetCurrentInbox());
 
-        _readStates = new();
+        _readStates = new Dictionary<string, bool>();
         foreach (var msg in result.Messages)
         {
-            _readStates[msg.Id] = false; // Optional: preload read status
+            _readStates[msg.Id] = await MailReadStateService.IsReadAsync(Domain, msg.Id);
         }
 
         return new TableData<MessageDto>
@@ -153,9 +155,12 @@
 
     private async Task DeleteMessage(MessageDto message)
     {
-        await MailinatorApiClient.DeleteMailByIdAsync(Domain, GetCurrentInbox(), message.Id);
-        await _table.ReloadServerData();
-        Snackbar.Add("Message deleted successfully.", Severity.Info);
+        if (OnDeleteMessage.HasDelegate)
+        {
+            await OnDeleteMessage.InvokeAsync(message);
+            await _table.ReloadServerData();
+            Snackbar.Add("Message deleted successfully.", Severity.Info);
+        }
     }
 
     private string GetRowClass(MessageDto message, int index)

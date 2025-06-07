@@ -98,7 +98,7 @@ else
     [Parameter, EditorRequired] public string Domain { get; set; } = string.Empty;
     [Parameter, EditorRequired] public string MailId { get; set; } = string.Empty;
     [Parameter] public EventCallback OnBack { get; set; }
-    [Parameter] public EventCallback<MessageDto> OnDelete { get; set; }
+    [Parameter] public EventCallback<MessageDto> OnDeleteMessage { get; set; }
 
     private MessageDto? _message;
     private string _rawJsonPayload = string.Empty;
@@ -183,7 +183,9 @@ else
 
     private async Task DeleteMessage()
     {
+
         if (_message is null) return;
-        await OnDelete.InvokeAsync(_message);
+        await OnDeleteMessage.InvokeAsync(_message);
+        await OnBack.InvokeAsync();
     }
 }

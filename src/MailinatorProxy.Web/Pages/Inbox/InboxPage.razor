@@ -1,7 +1,12 @@
 @page "/{Domain}/Inbox"
 @page "/{Domain}/Inbox/{MailId}"
+@using MailinatorProxy.Shared.Dtos.Mails
+@using MailinatorProxy.Web.ApiClients
 @using MailinatorProxy.Web.Components.Inbox
 @using MailinatorProxy.Web.Components
+@using MailinatorProxy.Web.Services
+@inject IMailReadStateService MailReadStateService
+@inject IMalinatorApiClient MailinatorApiClient
 @inject NavigationManager NavigationManager
 
 <DomainGuard Domain="@Domain">
@@ -9,11 +14,11 @@
 
     @if (string.IsNullOrEmpty(MailId))
     {
-        <InboxList Domain="@Domain" OnSelectMessage="OnSelectMessage" />
+        <InboxList Domain="@Domain" OnSelectMessage="OnSelectMessage" OnDeleteMessage="OnDeleteMessage" />
     }
     else
     {
-        <InboxDetails Domain="@Domain" MailId="@MailId" OnBack="GoBackToList" />
+        <InboxDetails Domain="@Domain" MailId="@MailId" OnBack="GoBackToList" OnDeleteMessage="OnDeleteMessage" />
     }
 </DomainGuard>
 
@@ -29,6 +34,12 @@
     private void GoBackToList()
     {
         NavigationManager.NavigateTo($"/{Domain}/Inbox");
+    }
+
+    private async Task OnDeleteMessage(MessageDto message)
+    {
+        await MailinatorApiClient.DeleteMailByIdAsync(Domain, message.To, message.Id);
+        await MailReadStateService.RemoveAsync(Domain, message.Id);
     }
 
     private string GetPageTitle()

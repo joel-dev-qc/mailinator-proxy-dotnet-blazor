@@ -1,3 +1,4 @@
-::deep .unread-row {
+::deep .unread-row td,
+::deep .unread-row td * {
     font-weight: bold !important;
 }
