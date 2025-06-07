@@ -1,0 +1,192 @@
+@using MailinatorProxy.Web.Services
+@using MailinatorProxy.Shared.Dtos.Mails
+@using MailinatorProxy.Web.ApiClients
+@using MailinatorProxy.Web.Extensions
+@using MailinatorProxy.Web.States
+@inject IMalinatorApiClient MailinatorApiClient
+@inject InboxFilterState InboxFilterState
+@inject InboxFavoriteState InboxFavoriteState
+@inject ISnackbar Snackbar
+
+<DynamicDataFilter @ref="_dynamicDataFilter" Model="_inboxFilters" OnFiltersChanged="ReloadData">
+    <MudGrid Spacing="2">
+        <MudItem lg="4" md="5" sm="6" xs="12">
+            <MudTextField @bind-Value="_inboxFilters.Inbox"
+                          For="() => _inboxFilters.Inbox"
+                          T="string?"
+                          Label="Inbox"
+                          Margin="Margin.Dense"
+                          Variant="Variant.Outlined"
+                          @onfocusout="@(() => _inboxFilters.Inbox = GetCurrentInbox())"
+                          AdornmentIcon="@Icons.Material.Filled.Undo"
+                          Adornment="@(_inboxFilters.Inbox != "*" ? Adornment.End : Adornment.None)"
+                          AdornmentAriaLabel="All inboxes"
+                          OnAdornmentClick="@(() => OnInboxToFiltersChanged("*"))" />
+        </MudItem>
+
+        <MudItem lg="12" md="12" sm="12" xs="12">
+            <div class="d-flex flex-wrap gap-2 py-4">
+                @foreach (var favorite in _mailToFavorites)
+                {
+                    <MudChip T="string"
+                             Size="Size.Medium"
+                             OnClose="@(() => InboxFavoriteState.ToggleFavoriteAsync(Domain, favorite))"
+                             CloseIcon="@Icons.Material.Filled.Close"
+                             Icon="@Icons.Material.Filled.Star"
+                             OnClick="() => OnInboxToFiltersChanged(favorite)">@favorite</MudChip>
+                }
+            </div>
+        </MudItem>
+    </MudGrid>
+</DynamicDataFilter>
+
+<MudPaper>
+    <div class="pa-4">
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="_table.ReloadServerData"/>
+        </MudStack>
+    </div>
+    <div>
+        <MudTable ServerData="ServerReload"
+                  Hover="true"
+                  @ref="_table"
+                  Elevation="0"
+                  T="MessageDto"
+                  RowClassFunc="GetRowClass"
+                  OnRowClick="OnSelectMessageEvent">
+
+            <RowTemplate>
+                <MudTd Class="align-content-start">
+                    <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
+                </MudTd>
+
+                <MudTd Class="align-content-start">
+                    <div class="d-flex flex-wrap">
+                        <MailToLabel FullEmail="@($"{context.To}@{context.Domain}")" Identifier="@context.To"
+                                     Size="Size.Small" Class="mr-2" Style="margin-top:-1px;" />
+                        <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
+                    </div>
+                </MudTd>
+
+                <MudTd Class="align-content-start">
+                    <MudText Typo="Typo.body1" Class="bold">
+                        <RelativeDate Date="@context.Time.ToDateTime()" />
+                    </MudText>
+                </MudTd>
+
+                <MudTd Class="align-content-start">
+                    <div class="d-flex justify-end gap-2">
+                        <SetMailFavorite Domain="@context.Domain" Identifier="@context.To" Size="Size.Small" />
+                        <MudTooltip Text="Delete">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Default"
+                                           Size="Size.Small"
+                                           OnClick="@(e => DeleteMessage(context))" />
+                        </MudTooltip>
+                    </div>
+                </MudTd>
+            </RowTemplate>
+
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter] public string Domain { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> OnSelectMessage { get; set; }
+
+    private MudTable<MessageDto> _table;
+    private DynamicDataFilter _dynamicDataFilter;
+    private Dictionary<string, bool> _readStates = new();
+    private List<string> _mailToFavorites = [];
+
+    private InboxFilters _inboxFilters = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InboxFavoriteState.InitializeAsync(Domain);
+        RefreshMailToFavorites();
+        InboxFavoriteState.OnChanged += HandleOnFavoriteChanged;
+    }
+
+    private Task ReloadData() => _table.ReloadServerData();
+
+    private async Task<TableData<MessageDto>> ServerReload(TableState state, CancellationToken token)
+    {
+        var result = await MailinatorApiClient.GetMailInboxAsync(Domain, GetCurrentInbox());
+
+        _readStates = new();
+        foreach (var msg in result.Messages)
+        {
+            _readStates[msg.Id] = false; // Optional: preload read status
+        }
+
+        return new TableData<MessageDto>
+        {
+            Items = result.Messages,
+            TotalItems = result.Messages.Count
+        };
+    }
+
+    private void OnInboxToFiltersChanged(string mailTo)
+    {
+        _inboxFilters.Inbox = mailTo;
+        _dynamicDataFilter.NotifyChanged(nameof(InboxFilters.Inbox));
+    }
+
+    private string GetCurrentInbox()
+    {
+        return string.IsNullOrEmpty(_inboxFilters.Inbox) ? "*" : _inboxFilters.Inbox;
+    }
+
+    private async Task OnSelectMessageEvent(TableRowClickEventArgs<MessageDto> selectedMessage)
+    {
+        if (selectedMessage.Item is { } messageDto)
+        {
+            if (OnSelectMessage.HasDelegate)
+                await OnSelectMessage.InvokeAsync(messageDto.Id);
+        }
+    }
+
+    private async Task DeleteMessage(MessageDto message)
+    {
+        await MailinatorApiClient.DeleteMailByIdAsync(Domain, GetCurrentInbox(), message.Id);
+        await _table.ReloadServerData();
+        Snackbar.Add("Message deleted successfully.", Severity.Info);
+    }
+
+    private string GetRowClass(MessageDto message, int index)
+    {
+        var readClass = _readStates.TryGetValue(message.Id, out var isRead) && !isRead
+            ? "unread-row"
+            : string.Empty;
+
+        return $"cursor-pointer {readClass}";
+    }
+
+    private void HandleOnFavoriteChanged(string identifier)
+    {
+        RefreshMailToFavorites();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshMailToFavorites()
+    {
+        _mailToFavorites = InboxFavoriteState.GetAllFavorites(Domain).ToList();
+    }
+
+    private class InboxFilters
+    {
+        public string Inbox { get; set; } = "*";
+    }
+
+    public void Dispose()
+    {
+        InboxFavoriteState.OnChanged -= HandleOnFavoriteChanged;
+    }
+}
+
+

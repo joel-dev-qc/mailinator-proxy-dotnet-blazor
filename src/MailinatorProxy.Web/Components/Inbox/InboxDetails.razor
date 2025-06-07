@@ -1,0 +1,189 @@
+@using MailinatorProxy.Shared.Dtos.Mails
+@using MailinatorProxy.Shared.Extensions
+@using System.Text.Json
+@using MailinatorProxy.Web.Extensions
+@using HighlightBlazor;
+@using MailinatorProxy.Web.ApiClients
+@using MailinatorProxy.Web.Services
+@using MailinatorProxy.Web.States
+@inject IClipboardService ClipboardService
+@inject NavigationManager NavigationManager
+@inject IMalinatorApiClient MailinatorApiClient
+@inject IMailReadStateService MailReadStateService
+@inject InboxFilterState InboxFilterState
+
+@if (_isLoading)
+{
+    <MudPaper Class="pa-4">
+        <MudSkeleton Height="40px" Width="80%" Class="mb-2" />
+        <MudSkeleton Height="30px" Width="60%" Class="mb-1" />
+        <MudSkeleton Height="300px" Width="100%" />
+    </MudPaper>
+}
+else if (_message is null)
+{
+    <MudAlert Severity="Severity.Error">Failed to load the message.</MudAlert>
+    <MudButton Variant="Variant.Text" OnClick="LoadMessageAsync">Retry</MudButton>
+}
+else if (_errorMessage is not null)
+{
+    <MudPaper Class="pa-4">
+        <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
+        <MudButton OnClick="LoadMessageAsync" Variant="Variant.Filled" Color="Color.Primary">Retry</MudButton>
+    </MudPaper>
+}
+else
+{
+    <MudPaper>
+        <div class="pa-4">
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="OnBack"/>
+            </MudStack>
+        </div>
+        <MudPaper Elevation="0">
+            <div class="pa-4">
+                <div class="d-flex flex-wrap align-center mb-4">
+                    <MailToLabel FullEmail="@($"{_message.To}@{Domain}")" Identifier="@_message.To" Size="Size.Medium"  />
+                    <MudText Typo="Typo.h5">@_message.Subject</MudText>
+                </div>
+
+                <MudStack Row AlignItems="AlignItems.End" Justify="Justify.SpaceBetween" Spacing="2">
+                    <EmailFrom Email="@_message.Fromfull" Name="@_message.From"/>
+                    <div>
+                        <RelativeDate Date="@_message.Time.ToDateTime()" DisplayTime="true"/>
+                    </div>
+                </MudStack>
+            </div>
+
+            <div class="d-flex">
+                <MudSpacer/>
+                <MudToolBar>
+                    <SetMailFavorite Domain="@Domain" Identifier="@_message.To" />
+
+                    <MudTooltip Text="Delete">
+                        <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="DeleteMessage" />
+                    </MudTooltip>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user menu">
+                        <MudMenuItem Label="Copy ID" Icon="@Icons.Material.Filled.ContentCopy" OnClick="CopyIdToClipboard"/>
+                        <MudMenuItem Label="Copy URL" Icon="@Icons.Material.Filled.Link" OnClick="CopyUrlToClipboard"/>
+                        <MudMenuItem Label="Copy JSON" Icon="@Icons.Material.Filled.Code" OnClick="CopyJsonToClipboard"/>
+                    </MudMenu>
+                </MudToolBar>
+            </div>
+
+            <MudTabs Border="true">
+                <MudTabPanel Text="Email" Icon="@Icons.Material.Filled.Email">
+                    <div class="pa-4">
+                        <iframe
+                            srcdoc="@GetBody()"
+                            sandbox="allow-same-origin"
+                            style="width: 100%; height: 60vh; border: none; display: block;"
+                        ></iframe>
+                    </div>
+                </MudTabPanel>
+                <MudTabPanel Text="JSON" Icon="@Icons.Material.Filled.Code">
+                    <div class="pa-4">
+                        <CodeHighlight CodeLanguage="json" Indent="true">
+                            @_rawJsonPayload
+                        </CodeHighlight>
+                    </div>
+                </MudTabPanel>
+            </MudTabs>
+        </MudPaper>
+    </MudPaper>
+
+}
+
+@code {
+    [Parameter, EditorRequired] public string Domain { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string MailId { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback<MessageDto> OnDelete { get; set; }
+
+    private MessageDto? _message;
+    private string _rawJsonPayload = string.Empty;
+    private string? _errorMessage;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMessageAsync();
+    }
+
+    private async Task LoadMessageAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            var inbox = string.IsNullOrWhiteSpace(InboxFilterState.CurrentInbox) ? "*" : InboxFilterState.CurrentInbox;
+
+            await MailReadStateService.MarkAsReadAsync(Domain, MailId);
+            var response = await MailinatorApiClient.GetMailByIdAsync(Domain, inbox, MailId);
+            _message = response.Message;
+
+            _rawJsonPayload = JsonSerializer.Serialize(_message, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+
+        _isLoading = false;
+    }
+
+
+
+    private string GetBody()
+    {
+        var body = _message?.GetHtmlPart()?.Body
+                   ?? _message?.GetTextPart()?.Body
+                   ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(body))
+            return string.Empty;
+
+        var htmlDoc = new HtmlAgilityPack.HtmlDocument();
+        htmlDoc.LoadHtml(body);
+
+        var links = htmlDoc.DocumentNode.SelectNodes("//a");
+        if (links != null)
+        {
+            foreach (var link in links)
+            {
+                link.SetAttributeValue("target", "_blank");
+                link.SetAttributeValue("rel", "noopener noreferrer");
+            }
+        }
+
+        return htmlDoc.DocumentNode.OuterHtml;
+    }
+
+    private async Task CopyIdToClipboard()
+    {
+        if (_message is null) return;
+        await ClipboardService.CopyToClipboardAsync(_message.Id);
+    }
+
+    private async Task CopyUrlToClipboard()
+    {
+        await ClipboardService.CopyToClipboardAsync(NavigationManager.Uri);
+    }
+
+    private async Task CopyJsonToClipboard()
+    {
+        if (_message is null) return;
+        await ClipboardService.CopyToClipboardAsync(_rawJsonPayload);
+    }
+
+    private async Task DeleteMessage()
+    {
+        if (_message is null) return;
+        await OnDelete.InvokeAsync(_message);
+    }
+}

@@ -5,7 +5,7 @@ using Blazored.LocalStorage;
 
 namespace MailinatorProxy.Web.States;
 
-internal class MailToFavoriteState(ILocalStorageService localStorage)
+internal class InboxFavoriteState(ILocalStorageService localStorage)
 {
     private readonly Dictionary<string, HashSet<string>> _favoritesByDomain = new();
 

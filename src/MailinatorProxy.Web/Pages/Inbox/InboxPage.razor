@@ -1,0 +1,61 @@
+@page "/{Domain}/Inbox"
+@page "/{Domain}/Inbox/{MailId}"
+@using MailinatorProxy.Web.Components.Inbox
+@using MailinatorProxy.Web.Components
+@inject NavigationManager NavigationManager
+
+<DomainGuard Domain="@Domain">
+    <PageHeader PageTitle="@GetPageTitle()" BreadcrumbItems="GetBreadcrumbs()"/>
+
+    @if (string.IsNullOrEmpty(MailId))
+    {
+        <InboxList Domain="@Domain" OnSelectMessage="OnSelectMessage" />
+    }
+    else
+    {
+        <InboxDetails Domain="@Domain" MailId="@MailId" OnBack="GoBackToList" />
+    }
+</DomainGuard>
+
+@code {
+    [Parameter] public string Domain { get; set; } = string.Empty;
+    [Parameter] public string? MailId { get; set; }
+
+    private void OnSelectMessage(string mailId)
+    {
+        NavigationManager.NavigateTo($"/{Domain}/Inbox/{mailId}");
+    }
+
+    private void GoBackToList()
+    {
+        NavigationManager.NavigateTo($"/{Domain}/Inbox");
+    }
+
+    private string GetPageTitle()
+    {
+        return string.IsNullOrEmpty(MailId)
+            ? "Inbox"
+            : "Message Details";
+    }
+
+    private List<BreadcrumbItem> GetBreadcrumbs()
+    {
+        var items = new List<BreadcrumbItem>
+        {
+            new("Home", "home", false, icon: Icons.Material.Filled.Home),
+            new(Domain, $"/{Domain}", true, icon: Icons.Material.Filled.Domain)
+        };
+
+        if (string.IsNullOrEmpty(MailId))
+        {
+            items.Add(new("Inbox", null, true, icon: Icons.Material.Filled.Inbox));
+        }
+        else
+        {
+            items.Add(new("Inbox", $"/{Domain}/Inbox", false, icon: Icons.Material.Filled.Inbox));
+            items.Add(new("Details", null, true, icon: Icons.Material.Filled.Email));
+        }
+
+        return items;
+    }
+}

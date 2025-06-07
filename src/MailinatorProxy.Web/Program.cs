@@ -24,7 +24,8 @@ builder.Services.AddScoped<IMailReadStateService, MailReadStateService>();
 builder.Services.AddScoped<ILayoutService, LayoutService>();
 builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 builder.Services.AddScoped<DomainState>();
-builder.Services.AddScoped<MailToFavoriteState>();
+builder.Services.AddScoped<InboxFilterState>();
+builder.Services.AddScoped<InboxFavoriteState>();
 builder.Services.AddHighlight();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<IMalinatorApiClient>(sp =>
