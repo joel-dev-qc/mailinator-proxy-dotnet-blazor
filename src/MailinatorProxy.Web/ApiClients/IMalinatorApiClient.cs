@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using MailinatorProxy.API.Features.Teams.GetTeamStats;
 using MailinatorProxy.Shared.Dtos.Domains;
 using MailinatorProxy.Shared.Dtos.Mails;
 using MailinatorProxy.Shared.Enums;
@@ -15,4 +16,5 @@ internal interface IMalinatorApiClient
     Task<GetMailInboxQueryResponse> GetMailInboxAsync(string domain, string inbox, bool decodeSubject = false, SortingDirection? sort = null, int? limit = null, int? skip = null);
     Task<GetAllDomainsQueryResponse> GetAllDomainsAsync();
     Task<DeleteMailByIdCommandResponse> DeleteMailByIdAsync(string domain, string inbox, string messageId);
+    Task<GetTeamStatsQueryResponse> GetTeamStatsAsync();
 }

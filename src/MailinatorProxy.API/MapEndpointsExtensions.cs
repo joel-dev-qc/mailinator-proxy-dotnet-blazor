@@ -3,6 +3,7 @@
 
 using MailinatorProxy.API.Features.Domains;
 using MailinatorProxy.API.Features.Mails;
+using MailinatorProxy.API.Features.Teams;
 
 namespace MailinatorProxy.API;
 
@@ -12,5 +13,6 @@ internal static class MapEndpointsExtensions
     {
         app.RegisterMailsRoutes();
         app.RegisterDomainsRoutes();
+        app.RegisterTeamRoutes();
     }
 }

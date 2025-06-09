@@ -1,25 +1,113 @@
 ﻿@page "/"
+@using MailinatorProxy.API.Features.Teams.GetTeamStats
 @using MailinatorProxy.Shared.Dtos.Domains
+@using MailinatorProxy.Web.ApiClients
 @using MailinatorProxy.Web.Components
 @using MailinatorProxy.Web.Services
 @using MailinatorProxy.Web.States
 @inject DomainState DomainState
 @inject IDomainService DomainService
+@inject IMalinatorApiClient MalinatorApiClient
 
 
 <PageHeader PageTitle="Inbox" BreadcrumbItems="@(new List<BreadcrumbItem>
                                                {
-                                                   new("Home", "home", true, icon: Icons.Material.Filled.Home),
+                                                   new("Home", "", true, icon: Icons.Material.Filled.Home),
                                                })"/>
 
+<MudGrid Spacing="2">
+    @foreach (var domain in _domains)
+    {
+        <MudItem lg="4" md="6" sm="6" xs="12">
+            <MudPaper Class="mb-4 pa-4">
+                <MudText Typo="Typo.h3">@domain.Name</MudText>
+                <MudText Class="mb-2" Typo="Typo.body1">@domain.Description</MudText>
 
-@foreach (var domain in _domains)
+                <MudButton Href="@($"/{domain.Name}/Inbox")"
+                           Color="Color.Primary"
+                           Variant="Variant.Outlined">Open Inbox</MudButton>
+
+            </MudPaper>
+        </MudItem>
+
+    }
+</MudGrid>
+
+
+@if (_teamStats is not null)
 {
-    <MudPaper>
-        <MudText Typo="Typo.h3">@domain.Name</MudText>
-        <MudText Typo="Typo.body1">@domain.Description</MudText>
+    <MudPaper Class="mb-4">
+        <div class="pa-4">
+            <MudText Typo="Typo.h3">Team Statistics</MudText>
+        </div>
+        <MudGrid Spacing="2">
+            <MudItem xs="12" lg="4" xl="3" Class="pa-4">
+                <MudSimpleTable Hover="true">
+                    <tbody>
+                    <tr>
+                        <th>Daily Email Retrieval Limit</th>
+                        <td>@_teamStats.TeamPlan.EmailReadsPerDay</td>
+                    </tr>
 
-        <MudButton Href="@($"/{domain.Name}/Inbox")" Color="Color.Primary" Variant="Variant.Filled">Open Inbox</MudButton>
+                    <tr>
+                        <th>Number of Private Domains</th>
+                        <td>@_teamStats.TeamPlan.NumberOfPrivateDomains</td>
+                    </tr>
+
+                    <tr>
+                        <th>Allocated Storage (MB)</th>
+                        <td>@_teamStats.TeamPlan.StorageMb</td>
+                    </tr>
+
+                    <tr>
+                        <th>Team Member Accounts</th>
+                        <td>@_teamStats.TeamPlan.TeamAccounts</td>
+                    </tr>
+                    </tbody>
+
+                </MudSimpleTable>
+            </MudItem>
+            <MudItem xs="12" lg="8" xl="9">
+                <ReadMessageApiBarChart Stats="_teamStats" />
+            </MudItem>
+            <MudItem xs="12" lg="12">
+                <MudSimpleTable Hover="true" Elevation="0">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>API Emails Retrieved</th>
+                        <th>API Errors</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var statByDay in GetVisibleStats())
+                    {
+                        <tr>
+                            <td>@statByDay.Date.ToString("d")</td>
+                            <td>
+                                <PercentageIndicator
+                                    CurrentCount="@statByDay.Retrieved.ApiEmail"
+                                    MaxCount="@_teamStats.TeamPlan.EmailReadsPerDay"/>
+                            </td>
+                            <td>@statByDay.Retrieved.ApiError</td>
+                        </tr>
+                    }
+                    </tbody>
+                </MudSimpleTable>
+
+                @if (_teamStats.TeamStats.Count > 5)
+                {
+                    <div class="d-flex justify-center pa-4">
+                        <MudButton OnClick="ToggleShowAllStats" Variant="Variant.Outlined">
+                            @(_showAllStats ? "Show Less" : "Load More")
+                        </MudButton>
+
+                    </div>
+                }
+            </MudItem>
+        </MudGrid>
+
+
 
     </MudPaper>
 }
@@ -28,9 +116,33 @@
 @code
 {
     private List<DomainDto> _domains = [];
+    private GetTeamStatsQueryResponse? _teamStats;
+    private bool _showAllStats = false;
+    private TeamStatDto StatsOfToday;
 
     protected override async Task OnInitializedAsync()
     {
+        StatsOfToday = _teamStats?.TeamStats.FirstOrDefault() ?? new TeamStatDto();
         _domains = await DomainService.GetDomainsAsync();
+        await GetTeamStats();
     }
+
+    private async Task GetTeamStats()
+    {
+        _teamStats = await MalinatorApiClient.GetTeamStatsAsync();
+        StateHasChanged();
+    }
+
+    private void ToggleShowAllStats()
+    {
+        _showAllStats = !_showAllStats;
+    }
+
+    private IEnumerable<TeamStatDto> GetVisibleStats()
+    {
+        if (_teamStats is null)
+            return Enumerable.Empty<TeamStatDto>();
+        return _showAllStats ? _teamStats.TeamStats : _teamStats.TeamStats.Take(5);
+    }
+
 }

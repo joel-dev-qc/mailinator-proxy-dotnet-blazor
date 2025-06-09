@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Net.Http.Json;
+using MailinatorProxy.API.Features.Teams.GetTeamStats;
 using MailinatorProxy.Shared.Dtos.Domains;
 using MailinatorProxy.Shared.Dtos.Mails;
 using MailinatorProxy.Shared.Enums;
@@ -48,5 +49,10 @@ internal class MailinatorApiClient(HttpClient httpClient) : IMalinatorApiClient
     public Task<DeleteMailByIdCommandResponse> DeleteMailByIdAsync(string domain, string inbox, string messageId)
     {
         return httpClient.DeleteFromJsonAsync<DeleteMailByIdCommandResponse>($"/mails/{domain}/{inbox}/{messageId}");
+    }
+
+    public Task<GetTeamStatsQueryResponse> GetTeamStatsAsync()
+    {
+        return httpClient.GetFromJsonAsync<GetTeamStatsQueryResponse>("/teams/stats");
     }
 }

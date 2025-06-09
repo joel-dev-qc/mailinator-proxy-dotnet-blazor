@@ -1,0 +1,27 @@
+<div class="percentage-indicator-wrapper">
+    <div class="bar-background">
+        <div class="bar-fill" style="@GetBarStyle()"></div>
+        <div class="bar-text">@($"{Percentage:0}% ({CurrentCount}/{MaxCount})")</div>
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter] public int CurrentCount { get; set; }
+    [Parameter] public int MaxCount { get; set; }
+
+    private double Percentage => MaxCount == 0 ? 0 : (double)CurrentCount / MaxCount * 100;
+
+    private string GetBarStyle()
+    {
+        var colorVar = Percentage switch
+        {
+            >= 80 => "var(--mud-palette-error)",
+            >= 50 => "var(--mud-palette-warning)",
+            _ => "var(--mud-palette-success)"
+        };
+
+        return $"width: {Percentage}%; background-color: {colorVar};";
+    }
+}

@@ -1,0 +1,39 @@
+@using MailinatorProxy.API.Features.Teams.GetTeamStats
+
+<MudChart ChartType="ChartType.Bar"
+          ChartSeries="@Series"
+          XAxisLabels="@_xAxisLabels"
+          Width="100%"
+          CanHideSeries="true"
+          Height="350px"
+          AxisChartOptions="_axisChartOptions"
+          ChartOptions="_chartOptions"/>
+
+@code {
+    [Parameter, EditorRequired] public required GetTeamStatsQueryResponse Stats { get; set; }
+
+    private readonly AxisChartOptions _axisChartOptions = new()
+    {
+    };
+
+    private ChartOptions _chartOptions = new()
+    {
+        ChartPalette = ["#2979FF", "rgba(246, 78, 98, 1)"],
+    };
+
+    private List<ChartSeries> Series => new()
+    {
+        new ChartSeries
+        {
+            Name = "API Mail Retrieved",
+            Data = Stats.TeamStats.Take(5).Select(s => (double)s.Retrieved.ApiEmail).ToArray()
+        },
+        new ChartSeries
+        {
+            Name = "API Errors",
+            Data = Stats.TeamStats.Take(5).Select(s => (double)s.Retrieved.ApiError).ToArray(),
+        },
+    };
+
+    private string[] _xAxisLabels => Stats.TeamStats.Select(s => s.Date.ToString("d")).ToArray();
+}

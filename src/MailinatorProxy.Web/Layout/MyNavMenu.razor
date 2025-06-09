@@ -1,32 +1,37 @@
-﻿@using MailinatorProxy.Web.States
+﻿@using MailinatorProxy.Shared.Dtos.Domains
+@using MailinatorProxy.Web.Services
+@using MailinatorProxy.Web.States
 @inject DomainState DomainState
+@inject IDomainService DomainService
 
 <MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+    <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">Home</MudNavLink>
 
-    @if (_hasSelectedDomain)
+    @foreach(var domain in _domains)
     {
         <MudNavLink
-            Href="@($"/{DomainState.Current}/Inbox")"
+            Href="@($"/{domain.Name}/Inbox")"
             Match="NavLinkMatch.All"
-            Icon="@Icons.Material.Filled.Inbox">
-            Inbox
+            Icon="@Icons.Material.Filled.Domain">
+            Inbox - @GetShortDomainName(domain.Name)
         </MudNavLink>
     }
+
 </MudNavMenu>
 
 @code {
     private bool _hasSelectedDomain = false;
+    private List<DomainDto> _domains = new List<DomainDto>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await LoadDomainsAsync();
         DomainState.OnChanged += HandleDomainChanged;
         UpdateDomainFlag();
     }
 
     private void HandleDomainChanged()
     {
-        UpdateDomainFlag();
         InvokeAsync(StateHasChanged); // forcer re-render
     }
 
@@ -35,8 +40,29 @@
         _hasSelectedDomain = !string.IsNullOrEmpty(DomainState.Current);
     }
 
+    private async Task LoadDomainsAsync()
+    {
+        _domains = await DomainService.GetDomainsAsync();
+    }
+
     public void Dispose()
     {
         DomainState.OnChanged -= HandleDomainChanged;
+    }
+
+    private string GetShortDomainName(string? domain)
+    {
+        if (string.IsNullOrEmpty(domain))
+        {
+            return string.Empty;
+        }
+
+        // remove "testinator.com"
+        if (domain.EndsWith(".testinator.com", StringComparison.OrdinalIgnoreCase))
+        {
+            return domain.Substring(0, domain.Length - ".testinator.com".Length);
+        }
+
+        return domain;
     }
 }
