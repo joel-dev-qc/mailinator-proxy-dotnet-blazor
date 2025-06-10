@@ -21,10 +21,10 @@
 
 
 <MudLayout>
-    <MudAppBar>
+    <MudAppBar Elevation="1">
         <AppBar DrawerToggleCallback="DrawerToggle"/>
     </MudAppBar>
-    <MudDrawer @bind-Open="@_drawerOpen">
+    <MudDrawer @bind-Open="@_drawerOpen" ClipMode="DrawerClipMode.Docked">
         <div class="d-block d-md-none">
             <MudToolBar Dense="true" Gutters="false" Class="docs-gray-bg">
                 <MudIconButton Icon="@Icons.Material.Rounded.Close" Color="Color.Inherit" OnClick="DrawerToggle" aria-label="Toggle drawer"/>
