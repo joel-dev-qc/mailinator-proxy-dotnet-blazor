@@ -25,4 +25,10 @@
       <ProjectReference Include="..\MailinatorProxy.Shared\MailinatorProxy.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="wwwroot\appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

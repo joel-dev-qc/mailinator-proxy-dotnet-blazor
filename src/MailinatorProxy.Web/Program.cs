@@ -25,9 +25,11 @@ builder.Services.AddStores();
 builder.Services.AddStates();
 builder.Services.AddHighlight();
 builder.Services.AddBlazoredLocalStorage();
+
+var test = builder.Configuration.GetValue<string>("MailinatorProxyApiOptions:BaseUrl");
 builder.Services.AddScoped<IMalinatorApiClient>(sp =>
 {
-    var httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7291") };
+    var httpClient = new HttpClient { BaseAddress = new Uri(test) };
     return new MailinatorApiClient(httpClient);
 });
 
