@@ -5,7 +5,8 @@
 @using MailinatorProxy.Web.Components.Inbox
 @using MailinatorProxy.Web.Components
 @using MailinatorProxy.Web.Services
-@inject IMailReadStateService MailReadStateService
+@using MailinatorProxy.Web.States
+@inject MailReadState MailReadState
 @inject IMalinatorApiClient MailinatorApiClient
 @inject NavigationManager NavigationManager
 
@@ -39,7 +40,7 @@
     private async Task OnDeleteMessage(MessageDto message)
     {
         await MailinatorApiClient.DeleteMailByIdAsync(Domain, message.To, message.Id);
-        await MailReadStateService.RemoveAsync(Domain, message.Id);
+        await MailReadState.RemoveAsync(Domain, message.Id);
     }
 
     private string GetPageTitle()

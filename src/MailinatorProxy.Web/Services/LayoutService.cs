@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using MailinatorProxy.Web.Models;
+using MailinatorProxy.Web.Stores.Interfaces;
 using MudBlazor;
 
 namespace MailinatorProxy.Web.Services;
 
-internal class LayoutService(IUserPreferencesService userPreferencesService) : ILayoutService
+internal class LayoutService(IUserPreferenceStore userPreferenceStore) : ILayoutService
 {
     private UserPreference _userPreferences;
     private bool _systemPreferences;
@@ -31,7 +32,7 @@ internal class LayoutService(IUserPreferencesService userPreferencesService) : I
     {
         _systemPreferences = isDarkModeDefaultTheme;
 
-        _userPreferences = await userPreferencesService.LoadUserPreferences();
+        _userPreferences = await userPreferenceStore.LoadAsync();
 
         if (_userPreferences != null)
         {
@@ -48,7 +49,7 @@ internal class LayoutService(IUserPreferencesService userPreferencesService) : I
         {
             IsDarkMode = isDarkModeDefaultTheme;
             _userPreferences = new UserPreference { DarkLightTheme = DarkLightMode.System };
-            await userPreferencesService.SaveUserPreferences(_userPreferences);
+            await userPreferenceStore.SaveAsync(_userPreferences);
             OnMajorUpdateOccurred();
         }
     }
@@ -93,7 +94,7 @@ internal class LayoutService(IUserPreferencesService userPreferencesService) : I
         }
 
         _userPreferences.DarkLightTheme = CurrentDarkLightMode;
-        await userPreferencesService.SaveUserPreferences(_userPreferences);
+        await userPreferenceStore.SaveAsync(_userPreferences);
         OnMajorUpdateOccurred();
     }
 

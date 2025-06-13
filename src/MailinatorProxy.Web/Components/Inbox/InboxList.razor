@@ -6,7 +6,7 @@
 @inject IMalinatorApiClient MailinatorApiClient
 @inject InboxFilterState InboxFilterState
 @inject InboxFavoriteState InboxFavoriteState
-@inject IMailReadStateService MailReadStateService
+@inject MailReadState MailReadStateService
 @inject ISnackbar Snackbar
 
 <DynamicDataFilter @ref="_dynamicDataFilter" Model="_inboxFilters" OnFiltersChanged="ReloadData">

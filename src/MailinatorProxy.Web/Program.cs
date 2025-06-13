@@ -20,17 +20,14 @@ builder.Services.AddMudServices(config =>
 });
 builder.Services.AddScoped<IClipboardService, ClipboardService>();
 builder.Services.AddScoped<IDomainService, DomainService>();
-builder.Services.AddScoped<IMailReadStateService, MailReadStateService>();
 builder.Services.AddScoped<ILayoutService, LayoutService>();
-builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
-builder.Services.AddScoped<DomainState>();
-builder.Services.AddScoped<InboxFilterState>();
-builder.Services.AddScoped<InboxFavoriteState>();
+builder.Services.AddStores();
+builder.Services.AddStates();
 builder.Services.AddHighlight();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<IMalinatorApiClient>(sp =>
 {
-    var httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:5273/") };
+    var httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7291") };
     return new MailinatorApiClient(httpClient);
 });
 

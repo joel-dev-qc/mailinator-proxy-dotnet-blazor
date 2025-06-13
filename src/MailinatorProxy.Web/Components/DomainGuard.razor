@@ -3,6 +3,8 @@
 @inject IDomainService DomainService
 @inject DomainState DomainState
 @inject NavigationManager Nav
+@inject MailReadState MailReadState
+@inject InboxFavoriteState InboxFavoriteState
 
 @if (_isChecking)
 {
@@ -41,6 +43,9 @@ else
         {
             _isValid = true;
             DomainState.Set(Domain);
+
+            await MailReadState.InitializeAsync(Domain);
+            await InboxFavoriteState.InitializeAsync(Domain);
         }
         else
         {
