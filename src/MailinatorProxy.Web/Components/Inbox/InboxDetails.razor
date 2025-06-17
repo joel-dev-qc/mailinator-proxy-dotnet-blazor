@@ -1,6 +1,7 @@
 @using MailinatorProxy.Shared.Dtos.Mails
 @using MailinatorProxy.Shared.Extensions
 @using System.Text.Json
+@using System.Text.RegularExpressions
 @using MailinatorProxy.Web.Extensions
 @using HighlightBlazor;
 @using MailinatorProxy.Web.ApiClients
@@ -75,12 +76,61 @@ else
                 <MudTabPanel Text="Email" Icon="@Icons.Material.Filled.Email">
                     <div class="pa-4">
                         <iframe
-                            srcdoc="@GetBody()"
+                            srcdoc="@_mailBody"
                             sandbox="allow-same-origin"
                             style="width: 100%; height: 60vh; border: none; display: block;"
                         ></iframe>
                     </div>
                 </MudTabPanel>
+                <MudTabPanel Text="Links" Icon="@Icons.Material.Filled.Link">
+                    <div class="pa-4">
+                        @if (_message is not null)
+                        {
+                            <MudSimpleTable Hover="true" Style="table-layout: fixed; width: 100%;">
+                                <colgroup>
+                                    <col style="width: 40%;" />
+                                    <col style="width: 60%;" />
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Link</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @if (_links.Any())
+                                {
+
+                                    @foreach (var link in _links)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @if (string.IsNullOrEmpty(link.link))
+                                                {
+                                                    <MudText Typo="Typo.body1">[No name]</MudText>
+                                                }
+                                                else
+                                                {
+                                                    <MudText Typo="Typo.body1">@link.name</MudText>
+                                                }
+                                            </td>
+                                            <td>
+                                                <CopyContent Content="@link.link">
+                                                    <MudLink Target="_blank" Href="@link.link" rel="noopener noreferrer">@link.link</MudLink>
+                                                </CopyContent>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                </tbody>
+
+                            </MudSimpleTable>
+
+                        }
+                    </div>
+
+                </MudTabPanel>
+
                 <MudTabPanel Text="JSON" Icon="@Icons.Material.Filled.Code">
                     <div class="pa-4">
                         <CodeHighlight CodeLanguage="json" Indent="true">
@@ -104,6 +154,8 @@ else
     private string _rawJsonPayload = string.Empty;
     private string? _errorMessage;
     private bool _isLoading = true;
+    private string _mailBody = string.Empty;
+    private List<(string name, string link)> _links = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -114,6 +166,7 @@ else
     {
         _isLoading = true;
         _errorMessage = null;
+        _message = null;
 
         try
         {
@@ -123,11 +176,14 @@ else
             var response = await MailinatorApiClient.GetMailByIdAsync(Domain, inbox, MailId);
             _message = response.Message;
 
-            _rawJsonPayload = JsonSerializer.Serialize(_message, new JsonSerializerOptions
+            _rawJsonPayload = JsonSerializer.Serialize(response.Message, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
+
+            SetBody();
+            SetBodyLinks();
         }
         catch (Exception ex)
         {
@@ -139,14 +195,14 @@ else
 
 
 
-    private string GetBody()
+    private void SetBody()
     {
         var body = _message?.GetHtmlPart()?.Body
                    ?? _message?.GetTextPart()?.Body
                    ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(body))
-            return string.Empty;
+            return;
 
         var htmlDoc = new HtmlAgilityPack.HtmlDocument();
         htmlDoc.LoadHtml(body);
@@ -161,7 +217,28 @@ else
             }
         }
 
-        return htmlDoc.DocumentNode.OuterHtml;
+        _mailBody = htmlDoc.DocumentNode.OuterHtml;
+    }
+
+    private void SetBodyLinks()
+    {
+        _links.Clear();
+
+        var htmlBody = _message?.GetHtmlPart()?.Body;
+        if (!string.IsNullOrEmpty(htmlBody))
+        {
+            var links = htmlBody.GetLinksFromHtml();
+            _links.AddRange(links);
+
+            return;
+        }
+
+        var textBody = _message?.GetTextPart()?.Body;
+        if (!string.IsNullOrEmpty(textBody))
+        {
+            var links = htmlBody.GetLinksFromText();
+            _links.AddRange(links);
+        }
     }
 
     private async Task CopyIdToClipboard()
