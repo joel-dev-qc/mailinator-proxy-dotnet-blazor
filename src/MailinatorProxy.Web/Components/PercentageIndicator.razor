@@ -22,6 +22,8 @@
             _ => "var(--mud-palette-success)"
         };
 
-        return $"width: {Percentage}%; background-color: {colorVar};";
+        var percentageFormatted = Percentage.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+        return $"width: {percentageFormatted}%; background-color: {colorVar};";
     }
 }
