@@ -5,15 +5,15 @@
 @using MailinatorProxy.Web.Components
 @using MailinatorProxy.Web.Services
 @using MailinatorProxy.Web.States
+@using Microsoft.Extensions.Localization
 @inject DomainState DomainState
 @inject IDomainService DomainService
 @inject IMalinatorApiClient MalinatorApiClient
+@inject IBreadcrumbService BreadcrumbService
+@inject IStringLocalizer<Home> L
 
 
-<PageHeader PageTitle="Inbox" BreadcrumbItems="@(new List<BreadcrumbItem>
-                                               {
-                                                   new("Home", "", true, icon: Icons.Material.Filled.Home),
-                                               })"/>
+<PageHeader PageTitle="@L["Home_Title"]" BreadcrumbItems="@BreadcrumbService.GetHomeBreadcrumbs()"/>
 
 <MudGrid Spacing="2">
     @foreach (var domain in _domains)
@@ -25,7 +25,7 @@
 
                 <MudButton Href="@($"/{domain.Name}/Inbox")"
                            Color="Color.Primary"
-                           Variant="Variant.Outlined">Open Inbox</MudButton>
+                           Variant="Variant.Outlined">@L["Home_OpenInboxButton"]</MudButton>
 
             </MudPaper>
         </MudItem>
@@ -38,29 +38,29 @@
 {
     <MudPaper Class="mb-4">
         <div class="pa-4">
-            <MudText Typo="Typo.h3">Team Statistics</MudText>
+            <MudText Typo="Typo.h3">@L["Home_TeamStatsTitle"]</MudText>
         </div>
         <MudGrid Spacing="2">
             <MudItem xs="12" lg="4" xl="3" Class="pa-4">
                 <MudSimpleTable Hover="true">
                     <tbody>
                     <tr>
-                        <th>Daily Email Retrieval Limit</th>
+                        <th>@L["Home_TeamStats_DailyLimit"]</th>
                         <td>@_teamStats.TeamPlan.EmailReadsPerDay</td>
                     </tr>
 
                     <tr>
-                        <th>Number of Private Domains</th>
+                        <th>@L["Home_TeamStats_PrivateDomains"]</th>
                         <td>@_teamStats.TeamPlan.NumberOfPrivateDomains</td>
                     </tr>
 
                     <tr>
-                        <th>Allocated Storage (MB)</th>
+                        <th>@L["Home_TeamStats_Storage"]</th>
                         <td>@_teamStats.TeamPlan.StorageMb</td>
                     </tr>
 
                     <tr>
-                        <th>Team Member Accounts</th>
+                        <th>@L["Home_TeamStats_Accounts"]</th>
                         <td>@_teamStats.TeamPlan.TeamAccounts</td>
                     </tr>
                     </tbody>
@@ -74,9 +74,9 @@
                 <MudSimpleTable Hover="true" Elevation="0">
                     <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>API Emails Retrieved</th>
-                        <th>API Errors</th>
+                        <th>@L["Home_TeamStats_Date"]</th>
+                        <th>@L["Home_TeamStats_ApiEmails"]</th>
+                        <th>@L["Home_TeamStats_ApiErrors"]</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -99,7 +99,7 @@
                 {
                     <div class="d-flex justify-center pa-4">
                         <MudButton OnClick="ToggleShowAllStats" Variant="Variant.Outlined">
-                            @(_showAllStats ? "Show Less" : "Load More")
+                            @( _showAllStats ? L["Home_ShowLess"] : L["Home_LoadMore"] )
                         </MudButton>
 
                     </div>
@@ -141,7 +141,7 @@
     private IEnumerable<TeamStatDto> GetVisibleStats()
     {
         if (_teamStats is null)
-            return Enumerable.Empty<TeamStatDto>();
+            return [];
         return _showAllStats ? _teamStats.TeamStats : _teamStats.TeamStats.Take(5);
     }
 

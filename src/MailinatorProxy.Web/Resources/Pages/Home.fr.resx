@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
+  </resheader>
+  <data name="Home_Title" xml:space="preserve">
+    <value>Accueil</value>
+  </data>
+  <data name="Home_OpenInboxButton" xml:space="preserve">
+    <value>Ouvrir la boîte</value>
+  </data>
+  <data name="Home_TeamStatsTitle" xml:space="preserve">
+    <value>Statistiques de l'équipe</value>
+  </data>
+  <data name="Home_TeamStats_DailyLimit" xml:space="preserve">
+    <value>Limite quotidienne d'emails</value>
+  </data>
+  <data name="Home_TeamStats_PrivateDomains" xml:space="preserve">
+    <value>Domaines privés</value>
+  </data>
+  <data name="Home_TeamStats_Storage" xml:space="preserve">
+    <value>Stockage (Mo)</value>
+  </data>
+  <data name="Home_TeamStats_Accounts" xml:space="preserve">
+    <value>Comptes d'équipe</value>
+  </data>
+  <data name="Home_TeamStats_Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Home_TeamStats_ApiEmails" xml:space="preserve">
+    <value>Emails API récupérés</value>
+  </data>
+  <data name="Home_TeamStats_ApiErrors" xml:space="preserve">
+    <value>Erreurs API</value>
+  </data>
+  <data name="Home_ShowLess" xml:space="preserve">
+    <value>Afficher moins</value>
+  </data>
+  <data name="Home_LoadMore" xml:space="preserve">
+    <value>Charger plus</value>
+  </data>
+</root>

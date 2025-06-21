@@ -8,4 +8,5 @@ namespace MailinatorProxy.Web.Services;
 public interface IBreadcrumbService
 {
     List<BreadcrumbItem> GetInboxBreadcrumbs(string domain, string? mailId = null);
+    List<BreadcrumbItem> GetHomeBreadcrumbs();
 }

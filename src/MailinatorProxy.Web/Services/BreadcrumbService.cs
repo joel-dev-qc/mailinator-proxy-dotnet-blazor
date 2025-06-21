@@ -33,6 +33,13 @@ namespace MailinatorProxy.Web.Services
 
             return items;
         }
+
+        public List<BreadcrumbItem> GetHomeBreadcrumbs()
+        {
+            return new List<BreadcrumbItem>
+            {
+                new(_localizer["Home_Label"], "", true, icon: Icons.Material.Filled.Home)
+            };
+        }
     }
 }
-
