@@ -25,12 +25,19 @@ builder.Services.AddStores();
 builder.Services.AddStates();
 builder.Services.AddHighlight();
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddLocalization();
+builder.Services.AddMudServices();
 
-var test = builder.Configuration.GetValue<string>("MailinatorProxyApiOptions:BaseUrl");
+string? httpClientBaseUrl = builder.Configuration.GetValue<string>("MailinatorProxyApiOptions:BaseUrl");
 builder.Services.AddScoped<IMalinatorApiClient>(sp =>
 {
-    var httpClient = new HttpClient { BaseAddress = new Uri(test) };
+    var httpClient = new HttpClient { BaseAddress = new Uri(httpClientBaseUrl) };
     return new MailinatorApiClient(httpClient);
 });
 
-await builder.Build().RunAsync();
+
+var host = builder.Build();
+
+await host.SetDefaultCulture();
+
+await host.RunAsync();

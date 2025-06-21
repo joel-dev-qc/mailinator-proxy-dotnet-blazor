@@ -1,0 +1,43 @@
+@using System.Globalization
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+
+<MudMenu>
+    <ActivatorContent>
+        <MudIconButton
+            Color="Color.Inherit"
+            Icon="@Icons.Material.Filled.Language"
+        />
+    </ActivatorContent>
+    <ChildContent>
+        <MudMenuItem Disabled="Equals(_currentCulture, _frenchCulture)" OnClick="@(() => ChangeCulture(_frenchCulture))">
+            Français
+        </MudMenuItem>
+        <MudMenuItem Disabled="Equals(_currentCulture, _englishCulture)" OnClick="@(() => ChangeCulture(_englishCulture))">
+            English
+        </MudMenuItem>
+    </ChildContent>
+</MudMenu>
+
+
+@code {
+    private CultureInfo _currentCulture;
+    private CultureInfo _frenchCulture = new("fr-CA");
+    private CultureInfo _englishCulture = new("en-CA");
+
+    protected override void OnInitialized()
+    {
+        _currentCulture = CultureInfo.CurrentCulture;
+    }
+
+    private void ChangeCulture(CultureInfo culture)
+    {
+        if (!Equals(_currentCulture, culture))
+        {
+            var js = (IJSInProcessRuntime)JsRuntime;
+            js.InvokeVoid("blazorCulture.set", culture.Name);
+
+            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        }
+    }
+}

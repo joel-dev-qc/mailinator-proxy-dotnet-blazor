@@ -3,9 +3,9 @@
 @inject ILayoutService LayoutService
 
 
-@*<MudTooltip Delay="500" Text="Language">
-    <CultureSelectionAppBarMenu />
-</MudTooltip>*@
+<MudTooltip Delay="500" Text="Language">
+    <AppBarCultureMenuButton />
+</MudTooltip>
 <MudTooltip Delay="500" Text="@(DarkLightModeButtonText)">
     <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@LayoutService.CycleDarkLightModeAsync" aria-label="@(DarkLightModeButtonText)" />
 </MudTooltip>
