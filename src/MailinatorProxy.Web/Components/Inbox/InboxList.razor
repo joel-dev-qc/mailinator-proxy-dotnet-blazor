@@ -4,7 +4,6 @@
 @using MailinatorProxy.Web.States
 @using Microsoft.Extensions.Localization
 @inject IMalinatorApiClient MailinatorApiClient
-@inject InboxFilterState InboxFilterState
 @inject InboxFavoriteState InboxFavoriteState
 @inject MailReadState MailReadStateService
 @inject ISnackbar Snackbar
@@ -43,59 +42,68 @@
     </MudGrid>
 </DynamicDataFilter>
 
-<MudPaper>
-    <div class="pa-4">
-        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-            <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="_table.ReloadServerData"/>
-        </MudStack>
-    </div>
-    <div>
-        <MudTable ServerData="ServerReload"
-                  Hover="true"
-                  @ref="_table"
-                  Elevation="0"
-                  T="MessageDto"
-                  RowClassFunc="GetRowClass"
-                  OnRowClick="OnSelectMessageEvent">
+<AutoRefreshWrapper @ref="_autoRefresh" RefreshIntervalSeconds="5" OnRefresh="() => _table.ReloadServerData()">
+    <MudPaper>
+        <div class="pa-4">
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="_autoRefresh.RefreshAsync" />
+                    <MudIconButton Icon="@(_autoRefresh.IsEnabled ? Icons.Material.Filled.Pause : Icons.Material.Filled.PlayArrow)"
+                                   OnClick="_autoRefresh.Toggle" />
+                    @_autoRefresh.Status
+                </MudStack>
 
-            <RowTemplate>
-                <MudTd Class="align-content-start">
-                    <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
-                </MudTd>
+            </MudStack>
+        </div>
+        <div>
+            <MudTable ServerData="ServerReload"
+                      Hover="true"
+                      @ref="_table"
+                      Elevation="0"
+                      T="MessageDto"
+                      RowClassFunc="GetRowClass"
+                      OnRowClick="OnSelectMessageEvent">
 
-                <MudTd Class="align-content-start">
-                    <div class="d-flex flex-wrap">
-                        <MailToLabel FullEmail="@($"{context.To}@{context.Domain}")" Identifier="@context.To"
-                                     Size="Size.Small" Class="mr-2" Style="margin-top:-1px;" />
-                        <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
-                    </div>
-                </MudTd>
+                <RowTemplate>
+                    <MudTd Class="align-content-start">
+                        <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
+                    </MudTd>
 
-                <MudTd Class="align-content-start">
-                    <MudText Typo="Typo.body1" Class="bold">
-                        <RelativeDate DisplayTime="true" Date="@context.Time.ToDateTime()" />
-                    </MudText>
-                </MudTd>
+                    <MudTd Class="align-content-start">
+                        <div class="d-flex flex-wrap">
+                            <MailToLabel FullEmail="@($"{context.To}@{context.Domain}")" Identifier="@context.To"
+                                         Size="Size.Small" Class="mr-2" Style="margin-top:-1px;" />
+                            <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
+                        </div>
+                    </MudTd>
 
-                <MudTd Class="align-content-start">
-                    <div class="d-flex justify-end gap-2">
-                        <SetMailFavorite Domain="@context.Domain" Identifier="@context.To" Size="Size.Small" />
-                        <MudTooltip Text="Delete">
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                           Color="Color.Default"
-                                           Size="Size.Small"
-                                           OnClick="@(e => DeleteMessage(context))" />
-                        </MudTooltip>
-                    </div>
-                </MudTd>
-            </RowTemplate>
+                    <MudTd Class="align-content-start">
+                        <MudText Typo="Typo.body1" Class="bold">
+                            <RelativeDate DisplayTime="true" Date="@context.Time.ToDateTime()" />
+                        </MudText>
+                    </MudTd>
 
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
-    </div>
-</MudPaper>
+                    <MudTd Class="align-content-start">
+                        <div class="d-flex justify-end gap-2">
+                            <SetMailFavorite Domain="@context.Domain" Identifier="@context.To" Size="Size.Small" />
+                            <MudTooltip Text="Delete">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Color="Color.Default"
+                                               Size="Size.Small"
+                                               OnClick="@(e => DeleteMessage(context))" />
+                            </MudTooltip>
+                        </div>
+                    </MudTd>
+                </RowTemplate>
+
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        </div>
+    </MudPaper>
+</AutoRefreshWrapper>
+
 
 @code {
     [Parameter] public string Domain { get; set; } = string.Empty;
@@ -106,6 +114,7 @@
     private DynamicDataFilter _dynamicDataFilter;
     private Dictionary<string, bool> _readStates = new();
     private List<string> _mailToFavorites = [];
+    private AutoRefreshWrapper _autoRefresh;
 
     private InboxFilters _inboxFilters = new();
 

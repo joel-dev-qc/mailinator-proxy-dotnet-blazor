@@ -1,0 +1,113 @@
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Logging
+@implements IDisposable
+@inject ILogger<AutoRefreshWrapper> Logger
+@inject IStringLocalizer<AutoRefreshWrapper> L
+
+<div>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; }
+    [Parameter, EditorRequired] public Func<Task> OnRefresh { get; set; }
+    [Parameter] public int RefreshIntervalSeconds { get; set; } = 5;
+
+    private Timer _timer;
+    private bool _isDisposed;
+
+    public bool IsEnabled { get; private set; } = true;
+    public int Countdown { get; private set; }
+    public DateTime? LastUpdatedUtc { get; private set; }
+
+    protected override void OnInitialized()
+    {
+        Countdown = RefreshIntervalSeconds;
+
+        _timer = new Timer(async void (_) =>
+        {
+            if (_isDisposed || !IsEnabled)
+                return;
+
+            Countdown--;
+            if (Countdown <= 0)
+            {
+                Countdown = RefreshIntervalSeconds;
+                try
+                {
+                    await InvokeAsync(RefreshAsync);
+                    LastUpdatedUtc = DateTime.UtcNow;
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning(ex, "Auto-refresh failed.");
+                }
+            }
+
+            await InvokeAsync(StateHasChanged);
+
+        }, null, 1000, 1000); // Tick every second
+    }
+
+    public void Toggle()
+    {
+        IsEnabled = !IsEnabled;
+        Countdown = RefreshIntervalSeconds;
+    }
+
+    public void Dispose()
+    {
+        _isDisposed = true;
+        _timer?.Dispose();
+    }
+
+    public async Task RefreshAsync()
+    {
+        if (OnRefresh is not null)
+        {
+            await OnRefresh.Invoke();
+            LastUpdatedUtc = DateTime.UtcNow;
+            Countdown = RefreshIntervalSeconds;
+            StateHasChanged();
+        }
+    }
+
+    public RenderFragment Status => builder =>
+    {
+        builder.OpenComponent<MudStack>(0);
+        builder.AddAttribute(1, "Row", true);
+        builder.AddAttribute(2, "AlignItems", AlignItems.Center);
+        builder.AddAttribute(3, "Spacing", 1);
+        builder.AddAttribute(4, "ChildContent", (RenderFragment)(childBuilder =>
+        {
+            if (IsEnabled)
+            {
+                childBuilder.OpenComponent<MudChip<string>>(5);
+                childBuilder.AddAttribute(6, "T", typeof(string));
+                childBuilder.AddAttribute(7, "Color", Color.Primary);
+                childBuilder.AddAttribute(8, "Variant", Variant.Outlined);
+                childBuilder.AddAttribute(9, "Size", Size.Small);
+                childBuilder.AddAttribute(10, "Class", "text-white");
+                childBuilder.AddAttribute(11, "ChildContent", (RenderFragment)(chipBuilder =>
+                {
+                    chipBuilder.AddContent(12, $"Dans {Countdown}s");
+                }));
+                childBuilder.CloseComponent();
+            }
+
+            if (LastUpdatedUtc.HasValue)
+            {
+                childBuilder.OpenComponent<MudText>(12);
+                childBuilder.AddAttribute(13, "Typo", Typo.body2);
+                childBuilder.AddAttribute(14, "Color", Color.Inherit);
+                childBuilder.AddAttribute(15, "Class", "ml-2");
+                childBuilder.AddAttribute(16, "ChildContent", (RenderFragment)(textBuilder =>
+                {
+                    textBuilder.AddContent(17, $"Dernière mise à jour {LastUpdatedUtc.Value.ToLocalTime():HH:mm:ss}");
+                }));
+                childBuilder.CloseComponent();
+            }
+        }));
+        builder.CloseComponent();
+    };
+}
