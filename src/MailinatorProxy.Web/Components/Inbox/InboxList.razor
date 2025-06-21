@@ -47,9 +47,14 @@
         <div class="pa-4">
             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                 <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="_autoRefresh.RefreshAsync" />
-                    <MudIconButton Icon="@(_autoRefresh.IsEnabled ? Icons.Material.Filled.Pause : Icons.Material.Filled.PlayArrow)"
-                                   OnClick="_autoRefresh.Toggle" />
+                    <MudTooltip Text="@L["Inbox_RefreshTooltip"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="_autoRefresh.RefreshAsync"/>
+                    </MudTooltip>
+                    <MudTooltip Text="@(_autoRefresh.IsEnabled ? L["Inbox_AutoRefreshPauseTooltip"] : L["Inbox_AutoRefreshStartTooltip"])">
+                        <MudIconButton Icon="@(_autoRefresh.IsEnabled ? Icons.Material.Filled.Pause : Icons.Material.Filled.PlayArrow)"
+                                       OnClick="_autoRefresh.Toggle"/>
+                    </MudTooltip>
+
                     @_autoRefresh.Status
                 </MudStack>
 

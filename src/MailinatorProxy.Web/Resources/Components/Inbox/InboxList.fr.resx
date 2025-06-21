@@ -24,4 +24,13 @@
   <data name="Inbox_LoadError" xml:space="preserve">
     <value>Échec du chargement des données de la boîte de réception.</value>
   </data>
+  <data name="Inbox_RefreshTooltip" xml:space="preserve">
+    <value>Rafraîchir la liste</value>
+  </data>
+  <data name="Inbox_AutoRefreshPauseTooltip" xml:space="preserve">
+    <value>Mettre en pause l'auto-rafraîchissement</value>
+  </data>
+  <data name="Inbox_AutoRefreshStartTooltip" xml:space="preserve">
+    <value>Démarrer l'auto-rafraîchissement</value>
+  </data>
 </root>

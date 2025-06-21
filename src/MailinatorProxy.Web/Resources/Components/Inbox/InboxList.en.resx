@@ -24,4 +24,13 @@
   <data name="Inbox_LoadError" xml:space="preserve">
     <value>Failed to load inbox data.</value>
   </data>
+  <data name="Inbox_RefreshTooltip" xml:space="preserve">
+    <value>Refresh the list</value>
+  </data>
+  <data name="Inbox_AutoRefreshPauseTooltip" xml:space="preserve">
+    <value>Pause auto-refresh</value>
+  </data>
+  <data name="Inbox_AutoRefreshStartTooltip" xml:space="preserve">
+    <value>Start auto-refresh</value>
+  </data>
 </root>
