@@ -1,11 +1,13 @@
 ﻿@using MailinatorProxy.Shared.Dtos.Domains
 @using MailinatorProxy.Web.Services
 @using MailinatorProxy.Web.States
+@using Microsoft.Extensions.Localization
 @inject DomainState DomainState
 @inject IDomainService DomainService
+@inject IStringLocalizer<MyNavMenu> L
 
 <MudNavMenu>
-    <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">Home</MudNavLink>
+    <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">@L["Nav_Home"]</MudNavLink>
 
     @foreach(var domain in _domains)
     {
@@ -13,7 +15,7 @@
             Href="@($"/{domain.Name}/Inbox")"
             Match="NavLinkMatch.All"
             Icon="@Icons.Material.Filled.Domain">
-            Inbox - @GetShortDomainName(domain.Name)
+            @L["Nav_Inbox"] - @GetShortDomainName(domain.Name)
         </MudNavLink>
     }
 
