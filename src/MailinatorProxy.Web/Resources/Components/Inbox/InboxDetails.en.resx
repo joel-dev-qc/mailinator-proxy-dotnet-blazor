@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
+  </resheader>
+  <data name="LoadMessage_Error" xml:space="preserve">
+    <value>Failed to load the message.</value>
+  </data>
+  <data name="Retry_Button" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="Delete_Tooltip" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="UserMenu_AriaLabel" xml:space="preserve">
+    <value>Open user menu</value>
+  </data>
+  <data name="CopyId_MenuItem" xml:space="preserve">
+    <value>Copy ID</value>
+  </data>
+  <data name="CopyUrl_MenuItem" xml:space="preserve">
+    <value>Copy URL</value>
+  </data>
+  <data name="CopyJson_MenuItem" xml:space="preserve">
+    <value>Copy JSON</value>
+  </data>
+  <data name="LinksTable_NameHeader" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="LinksTable_LinkHeader" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="LinksTable_NoName" xml:space="preserve">
+    <value>[No name]</value>
+  </data>
+  <data name="TabPanel_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="TabPanel_Links" xml:space="preserve">
+    <value>Links</value>
+  </data>
+  <data name="TabPanel_Json" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+</root>

@@ -3,11 +3,13 @@
 @using MailinatorProxy.Web.ApiClients
 @using MailinatorProxy.Web.Extensions
 @using MailinatorProxy.Web.States
+@using Microsoft.Extensions.Localization
 @inject IMalinatorApiClient MailinatorApiClient
 @inject InboxFilterState InboxFilterState
 @inject InboxFavoriteState InboxFavoriteState
 @inject MailReadState MailReadStateService
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<InboxList> L
 
 <DynamicDataFilter @ref="_dynamicDataFilter" Model="_inboxFilters" OnFiltersChanged="ReloadData">
     <MudGrid Spacing="2">
@@ -15,13 +17,13 @@
             <MudTextField @bind-Value="_inboxFilters.Inbox"
                           For="() => _inboxFilters.Inbox"
                           T="string?"
-                          Label="Inbox"
+                          Label="@L["Inbox_Label"]"
                           Margin="Margin.Dense"
                           Variant="Variant.Outlined"
                           @onfocusout="@(() => _inboxFilters.Inbox = GetCurrentInbox())"
                           AdornmentIcon="@Icons.Material.Filled.Undo"
                           Adornment="@(_inboxFilters.Inbox != "*" ? Adornment.End : Adornment.None)"
-                          AdornmentAriaLabel="All inboxes"
+                          AdornmentAriaLabel="@L["AllInboxes_AriaLabel"]"
                           OnAdornmentClick="@(() => OnInboxToFiltersChanged("*"))" />
         </MudItem>
 
@@ -159,7 +161,7 @@
         {
             await OnDeleteMessage.InvokeAsync(message);
             await _table.ReloadServerData();
-            Snackbar.Add("Message deleted successfully.", Severity.Info);
+            Snackbar.Add(L["MessageDeleted_Info"], Severity.Info);
         }
     }
 
@@ -193,5 +195,3 @@
         InboxFavoriteState.OnChanged -= HandleOnFavoriteChanged;
     }
 }
-
-

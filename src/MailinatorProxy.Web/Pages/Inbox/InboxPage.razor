@@ -6,12 +6,15 @@
 @using MailinatorProxy.Web.Components
 @using MailinatorProxy.Web.Services
 @using MailinatorProxy.Web.States
+@using Microsoft.Extensions.Localization
 @inject MailReadState MailReadState
 @inject IMalinatorApiClient MailinatorApiClient
 @inject NavigationManager NavigationManager
+@inject IBreadcrumbService BreadcrumbService
+@inject IStringLocalizer<InboxPage> L
 
 <DomainGuard Domain="@Domain">
-    <PageHeader PageTitle="@GetPageTitle()" BreadcrumbItems="GetBreadcrumbs()"/>
+    <PageHeader PageTitle="@GetPageTitle()" BreadcrumbItems="@BreadcrumbService.GetInboxBreadcrumbs(Domain, MailId)"/>
 
     @if (string.IsNullOrEmpty(MailId))
     {
@@ -46,28 +49,7 @@
     private string GetPageTitle()
     {
         return string.IsNullOrEmpty(MailId)
-            ? "Inbox"
-            : "Message Details";
-    }
-
-    private List<BreadcrumbItem> GetBreadcrumbs()
-    {
-        var items = new List<BreadcrumbItem>
-        {
-            new("Home", "", false, icon: Icons.Material.Filled.Home),
-            new(Domain, $"/{Domain}", true, icon: Icons.Material.Filled.Domain)
-        };
-
-        if (string.IsNullOrEmpty(MailId))
-        {
-            items.Add(new("Inbox", null, true, icon: Icons.Material.Filled.Inbox));
-        }
-        else
-        {
-            items.Add(new("Inbox", $"/{Domain}/Inbox", false, icon: Icons.Material.Filled.Inbox));
-            items.Add(new("Details", null, true, icon: Icons.Material.Filled.Email));
-        }
-
-        return items;
+            ? L["InboxPage_InboxTitle"]
+            : L["InboxPage_DetailsTitle"];
     }
 }

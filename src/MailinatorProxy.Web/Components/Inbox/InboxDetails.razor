@@ -7,11 +7,13 @@
 @using MailinatorProxy.Web.ApiClients
 @using MailinatorProxy.Web.Services
 @using MailinatorProxy.Web.States
+@using Microsoft.Extensions.Localization
 @inject IClipboardService ClipboardService
 @inject NavigationManager NavigationManager
 @inject IMalinatorApiClient MailinatorApiClient
 @inject MailReadState MailReadStateService
 @inject InboxFilterState InboxFilterState
+@inject IStringLocalizer<InboxDetails> L
 
 @if (_isLoading)
 {
@@ -23,14 +25,14 @@
 }
 else if (_message is null)
 {
-    <MudAlert Severity="Severity.Error">Failed to load the message.</MudAlert>
-    <MudButton Variant="Variant.Text" OnClick="LoadMessageAsync">Retry</MudButton>
+    <MudAlert Severity="Severity.Error">@L["LoadMessage_Error"]</MudAlert>
+    <MudButton Variant="Variant.Text" OnClick="LoadMessageAsync">@L["Retry_Button"]</MudButton>
 }
 else if (_errorMessage is not null)
 {
     <MudPaper Class="pa-4">
         <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
-        <MudButton OnClick="LoadMessageAsync" Variant="Variant.Filled" Color="Color.Primary">Retry</MudButton>
+        <MudButton OnClick="LoadMessageAsync" Variant="Variant.Filled" Color="Color.Primary">@L["Retry_Button"]</MudButton>
     </MudPaper>
 }
 else
@@ -61,19 +63,19 @@ else
                 <MudToolBar>
                     <SetMailFavorite Domain="@Domain" Identifier="@_message.To" />
 
-                    <MudTooltip Text="Delete">
+                    <MudTooltip Text="@L["Delete_Tooltip"]">
                         <MudIconButton Icon="@Icons.Material.Outlined.Delete" OnClick="DeleteMessage" />
                     </MudTooltip>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user menu">
-                        <MudMenuItem Label="Copy ID" Icon="@Icons.Material.Filled.ContentCopy" OnClick="CopyIdToClipboard"/>
-                        <MudMenuItem Label="Copy URL" Icon="@Icons.Material.Filled.Link" OnClick="CopyUrlToClipboard"/>
-                        <MudMenuItem Label="Copy JSON" Icon="@Icons.Material.Filled.Code" OnClick="CopyJsonToClipboard"/>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="@L["UserMenu_AriaLabel"]">
+                        <MudMenuItem Label="@L["CopyId_MenuItem"]" Icon="@Icons.Material.Filled.ContentCopy" OnClick="CopyIdToClipboard"/>
+                        <MudMenuItem Label="@L["CopyUrl_MenuItem"]" Icon="@Icons.Material.Filled.Link" OnClick="CopyUrlToClipboard"/>
+                        <MudMenuItem Label="@L["CopyJson_MenuItem"]" Icon="@Icons.Material.Filled.Code" OnClick="CopyJsonToClipboard"/>
                     </MudMenu>
                 </MudToolBar>
             </div>
 
             <MudTabs Border="true">
-                <MudTabPanel Text="Email" Icon="@Icons.Material.Filled.Email">
+                <MudTabPanel Text="@L["TabPanel_Email"]" Icon="@Icons.Material.Filled.Email">
                     <div class="pa-4">
                         <iframe
                             srcdoc="@_mailBody"
@@ -82,7 +84,7 @@ else
                         ></iframe>
                     </div>
                 </MudTabPanel>
-                <MudTabPanel Text="Links" Icon="@Icons.Material.Filled.Link">
+                <MudTabPanel Text="@L["TabPanel_Links"]" Icon="@Icons.Material.Filled.Link">
                     <div class="pa-4">
                         @if (_message is not null)
                         {
@@ -93,8 +95,8 @@ else
                                 </colgroup>
                                 <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Link</th>
+                                    <th>@L["LinksTable_NameHeader"]</th>
+                                    <th>@L["LinksTable_LinkHeader"]</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -107,7 +109,7 @@ else
                                             <td>
                                                 @if (string.IsNullOrEmpty(link.link))
                                                 {
-                                                    <MudText Typo="Typo.body1">[No name]</MudText>
+                                                    <MudText Typo="Typo.body1">@L["LinksTable_NoName"]</MudText>
                                                 }
                                                 else
                                                 {
@@ -128,10 +130,8 @@ else
 
                         }
                     </div>
-
                 </MudTabPanel>
-
-                <MudTabPanel Text="JSON" Icon="@Icons.Material.Filled.Code">
+                <MudTabPanel Text="@L["TabPanel_Json"]" Icon="@Icons.Material.Filled.Code">
                     <div class="pa-4">
                         <CodeHighlight CodeLanguage="json" Indent="true">
                             @_rawJsonPayload
@@ -141,7 +141,6 @@ else
             </MudTabs>
         </MudPaper>
     </MudPaper>
-
 }
 
 @code {

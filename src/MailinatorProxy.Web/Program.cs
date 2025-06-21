@@ -23,9 +23,10 @@ builder.Services.AddScoped<IDomainService, DomainService>();
 builder.Services.AddScoped<ILayoutService, LayoutService>();
 builder.Services.AddStores();
 builder.Services.AddStates();
+builder.Services.AddServices();
 builder.Services.AddHighlight();
 builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddLocalization();
+builder.Services.AddLocalization(opt => opt.ResourcesPath = "Resources");
 builder.Services.AddMudServices();
 
 string? httpClientBaseUrl = builder.Configuration.GetValue<string>("MailinatorProxyApiOptions:BaseUrl");

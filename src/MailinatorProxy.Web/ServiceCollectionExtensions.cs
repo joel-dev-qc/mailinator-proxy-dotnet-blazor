@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
+using MailinatorProxy.Web.Services;
 using MailinatorProxy.Web.States;
 using MailinatorProxy.Web.Stores;
 using MailinatorProxy.Web.Stores.Interfaces;
@@ -26,6 +27,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped<InboxFilterState>();
         services.AddScoped<InboxFavoriteState>();
         services.AddScoped<MailReadState>();
+        return services;
+    }
+
+    public static IServiceCollection AddServices(this IServiceCollection services)
+    {
+        services.AddScoped<IBreadcrumbService, BreadcrumbService>();
+        services.AddScoped<IClipboardService, ClipboardService>();
+        services.AddScoped<IDomainService, DomainService>();
+        services.AddScoped<ILayoutService, LayoutService>();
+        // Ajoute ici d'autres services si besoin
         return services;
     }
 
