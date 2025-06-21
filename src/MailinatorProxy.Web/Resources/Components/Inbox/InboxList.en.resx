@@ -21,5 +21,7 @@
   <data name="MessageDeleted_Info" xml:space="preserve">
     <value>Message deleted successfully.</value>
   </data>
+  <data name="Inbox_LoadError" xml:space="preserve">
+    <value>Failed to load inbox data.</value>
+  </data>
 </root>
-
