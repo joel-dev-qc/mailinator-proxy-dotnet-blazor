@@ -72,6 +72,12 @@
         }
     }
 
+    public void ResetCountdown()
+    {
+        Countdown = RefreshIntervalSeconds;
+        StateHasChanged();
+    }
+
     public RenderFragment Status => builder =>
     {
         builder.OpenComponent<MudStack>(0);

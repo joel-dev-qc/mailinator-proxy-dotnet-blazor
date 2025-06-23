@@ -41,70 +41,82 @@
         </MudItem>
     </MudGrid>
 </DynamicDataFilter>
-
-<AutoRefreshWrapper @ref="_autoRefresh" RefreshIntervalSeconds="5" OnRefresh="() => _table.ReloadServerData()">
+<AutoRefreshWrapper @ref="_autoRefresh" RefreshIntervalSeconds="5" OnRefresh="CheckForNewMessages">
     <MudPaper>
         <div class="pa-4">
             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                 <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
                     <MudTooltip Text="@L["Inbox_RefreshTooltip"]">
-                        <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="_autoRefresh.RefreshAsync"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="_autoRefresh.RefreshAsync" />
                     </MudTooltip>
                     <MudTooltip Text="@(_autoRefresh.IsEnabled ? L["Inbox_AutoRefreshPauseTooltip"] : L["Inbox_AutoRefreshStartTooltip"])">
                         <MudIconButton Icon="@(_autoRefresh.IsEnabled ? Icons.Material.Filled.Pause : Icons.Material.Filled.PlayArrow)"
-                                       OnClick="_autoRefresh.Toggle"/>
+                                       OnClick="_autoRefresh.Toggle" />
                     </MudTooltip>
-
                     @_autoRefresh.Status
                 </MudStack>
 
+                <MudSpacer/>
+                <MudText Typo="Typo.body2">@_messages.Count message(s)</MudText>
             </MudStack>
         </div>
-        <div>
-            <MudTable ServerData="ServerReload"
-                      Hover="true"
-                      @ref="_table"
-                      Elevation="0"
-                      T="MessageDto"
-                      RowClassFunc="GetRowClass"
-                      OnRowClick="OnSelectMessageEvent">
 
-                <RowTemplate>
-                    <MudTd Class="align-content-start">
-                        <MudText Typo="Typo.body1" Class="bold">@context.From</MudText>
-                    </MudTd>
 
-                    <MudTd Class="align-content-start">
-                        <div class="d-flex flex-wrap">
-                            <MailToLabel FullEmail="@($"{context.To}@{context.Domain}")" Identifier="@context.To"
-                                         Size="Size.Small" Class="mr-2" Style="margin-top:-1px;" />
-                            <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
-                        </div>
-                    </MudTd>
+        <MudTable Items="_messages"
+                  Hover="true"
+                  @ref="_table"
+                  Loading="@_isLoading"
+                  LoadingProgressColor="Color.Info"
+                  Elevation="0"
+                  T="MessageDto"
+                  RowClassFunc="GetRowClass"
+                  OnRowClick="OnSelectMessageEvent">
 
-                    <MudTd Class="align-content-start">
-                        <MudText Typo="Typo.body1" Class="bold">
-                            <RelativeDate DisplayTime="true" Date="@context.Time.ToDateTime()" />
-                        </MudText>
-                    </MudTd>
 
-                    <MudTd Class="align-content-start">
-                        <div class="d-flex justify-end gap-2">
-                            <SetMailFavorite Domain="@context.Domain" Identifier="@context.To" Size="Size.Small" />
-                            <MudTooltip Text="Delete">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                               Color="Color.Default"
-                                               Size="Size.Small"
-                                               OnClick="@(e => DeleteMessage(context))" />
-                            </MudTooltip>
-                        </div>
-                    </MudTd>
-                </RowTemplate>
+            <RowTemplate>
+                <MudTd Class="align-content-start"><MudText Typo="Typo.body1" Class="bold">@context.From</MudText></MudTd>
+                <MudTd>
+                    <div class="d-flex flex-wrap">
+                        <MailToLabel FullEmail="@($"{context.To}@{context.Domain}")" Identifier="@context.To"
+                                     Size="Size.Small" Class="mr-2" Style="margin-top:-1px;"/>
+                        <MudText Typo="Typo.body1" Class="bold">@context.Subject</MudText>
+                    </div>
+                </MudTd>
+                <MudTd Class="align-content-start">
+                    <MudText Typo="Typo.body1" Class="bold">
+                        <RelativeDate DisplayTime="true" Date="@context.Time.ToDateTime()"/>
+                    </MudText>
+                </MudTd>
+                <MudTd Class="align-content-start">
+                    <div class="d-flex justify-end gap-2">
+                        <SetMailFavorite Domain="@context.Domain" Identifier="@context.To" Size="Size.Small"/>
+                        <MudTooltip Text="Delete">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Default"
+                                           Size="Size.Small"
+                                           OnClick="() => DeleteMessage(context)"/>
+                        </MudTooltip>
+                    </div>
+                </MudTd>
+            </RowTemplate>
 
-                <PagerContent>
-                    <MudTablePager />
-                </PagerContent>
-            </MudTable>
+        </MudTable>
+
+        <div class="d-flex justify-center my-4 pa-4">
+            @if (_hasMoreData)
+            {
+                <MudButton Disabled="_isLoading" OnClick="LoadMoreItems" StartIcon="@Icons.Material.Filled.MoreHoriz">
+                    @(_isLoading ? @L["Loading"] : @L["LoadMore"])
+                </MudButton>
+            }
+            else if (_messages.Count == 0)
+            {
+                <MudText Typo="Typo.caption">@L["NoMessages"]</MudText>
+            }
+            else
+            {
+                <MudText Typo="Typo.caption">@L["NoMoreMessages"]</MudText>
+            }
         </div>
     </MudPaper>
 </AutoRefreshWrapper>
@@ -115,11 +127,20 @@
     [Parameter] public EventCallback<string> OnSelectMessage { get; set; }
     [Parameter] public EventCallback<MessageDto> OnDeleteMessage { get; set; }
 
+    private const int RefreshWindowSize = 2;
+
     private MudTable<MessageDto> _table;
     private DynamicDataFilter _dynamicDataFilter;
+    private AutoRefreshWrapper _autoRefresh;
+    private List<MessageDto> _messages = [];
     private Dictionary<string, bool> _readStates = new();
     private List<string> _mailToFavorites = [];
-    private AutoRefreshWrapper _autoRefresh;
+
+    private int _pageSize = 2;
+    private int _currentOffset = 0;
+    private bool _hasMoreData = true;
+    private bool _isLoading = false;
+    private SemaphoreSlim _operationLock = new(1, 1);
 
     private InboxFilters _inboxFilters = new();
 
@@ -128,95 +149,167 @@
         await InboxFavoriteState.InitializeAsync(Domain);
         RefreshMailToFavorites();
         InboxFavoriteState.OnChanged += HandleOnFavoriteChanged;
+        await ReloadData();
     }
 
-    private Task ReloadData() => _table.ReloadServerData();
+    private async Task CheckForNewMessages()
+    {
 
-    private async Task<TableData<MessageDto>> ServerReload(TableState state, CancellationToken token)
+        if (_isLoading) return;
+
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var latestMessages = await LoadInboxAsync(0, RefreshWindowSize);
+
+            // Prevent duplicate messages by checking against current messages
+            var currentIds = new HashSet<string>(_messages.Select(m => m.Id));
+            var newMessages = latestMessages
+                .Where(m => !currentIds.Contains(m.Id))
+                .ToList();
+
+            if (newMessages.Count > 0)
+            {
+                foreach (var msg in newMessages)
+                {
+                    _readStates[msg.Id] = await MailReadStateService.IsReadAsync(Domain, msg.Id);
+                }
+
+                _messages.InsertRange(0, newMessages);
+
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error checking for new messages.");
+            Snackbar.Add(L["Inbox_LoadError"], Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ReloadData()
+    {
+        if (_isLoading) return;
+
+        await _operationLock.WaitAsync();
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var newMessages = await LoadInboxAsync(0, _pageSize);
+            _messages = DeduplicateAndAppend(newMessages, _messages);
+            _currentOffset = newMessages.Count;
+            _hasMoreData = newMessages.Count >= _pageSize;
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+            _operationLock.Release();
+        }
+    }
+
+    private async Task LoadMoreItems()
+    {
+        if (_isLoading || !_hasMoreData) return;
+
+        await _operationLock.WaitAsync();
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var moreMessages = await LoadInboxAsync(_currentOffset, _pageSize);
+            _messages = DeduplicateAndAppend(_messages, moreMessages);
+
+            _currentOffset = _messages.Count;
+            _hasMoreData = moreMessages.Count >= _pageSize;
+
+            // Ensure that the auto-refresh countdown is reset after loading more items. To prevent it from triggering immediately after loading.
+            _autoRefresh.ResetCountdown();
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+            _operationLock.Release();
+        }
+    }
+
+    private async Task<List<MessageDto>> LoadInboxAsync(int skip, int limit)
     {
         try
         {
-            var result = await MailinatorApiClient.GetMailInboxAsync(Domain, GetCurrentInbox());
-
-            _readStates = new Dictionary<string, bool>();
+            var result = await MailinatorApiClient.GetMailInboxAsync(Domain, GetCurrentInbox(), skip: skip, limit: limit);
             foreach (var msg in result.Messages)
             {
                 _readStates[msg.Id] = await MailReadStateService.IsReadAsync(Domain, msg.Id);
             }
-
-            return new TableData<MessageDto>
-            {
-                Items = result.Messages,
-                TotalItems = result.Messages.Count
-            };
+            return result.Messages;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Logger.LogError(e, "An error occurred while loading '{Domain}' inbox data: {Message}", Domain, e.Message);
+            Logger.LogError(ex, "Error loading inbox");
             Snackbar.Add(L["Inbox_LoadError"], Severity.Error);
-            return new TableData<MessageDto>();
-        }
-
-
-    }
-
-    private void OnInboxToFiltersChanged(string mailTo)
-    {
-        _inboxFilters.Inbox = mailTo;
-        _dynamicDataFilter.NotifyChanged(nameof(InboxFilters.Inbox));
-    }
-
-    private string GetCurrentInbox()
-    {
-        return string.IsNullOrEmpty(_inboxFilters.Inbox) ? "*" : _inboxFilters.Inbox;
-    }
-
-    private async Task OnSelectMessageEvent(TableRowClickEventArgs<MessageDto> selectedMessage)
-    {
-        if (selectedMessage.Item is { } messageDto)
-        {
-            if (OnSelectMessage.HasDelegate)
-                await OnSelectMessage.InvokeAsync(messageDto.Id);
+            return new();
         }
     }
 
-    private async Task DeleteMessage(MessageDto message)
+    private string GetRowClass(MessageDto msg, int index)
+    {
+        return _readStates.TryGetValue(msg.Id, out var read) && !read ? "unread-row cursor-pointer" : "cursor-pointer";
+    }
+
+    private async Task DeleteMessage(MessageDto msg)
     {
         if (OnDeleteMessage.HasDelegate)
         {
-            await OnDeleteMessage.InvokeAsync(message);
-            await _table.ReloadServerData();
+            await OnDeleteMessage.InvokeAsync(msg);
+            await ReloadData();
             Snackbar.Add(L["MessageDeleted_Info"], Severity.Info);
         }
     }
 
-    private string GetRowClass(MessageDto message, int index)
+    private async Task OnSelectMessageEvent(TableRowClickEventArgs<MessageDto> selected)
     {
-        var readClass = _readStates.TryGetValue(message.Id, out var isRead) && !isRead
-            ? "unread-row"
-            : string.Empty;
-
-        return $"cursor-pointer {readClass}";
+        if (OnSelectMessage.HasDelegate)
+        {
+            await OnSelectMessage.InvokeAsync(selected.Item.Id);
+        }
     }
 
-    private void HandleOnFavoriteChanged(string identifier)
+    private void OnInboxToFiltersChanged(string inbox)
     {
-        RefreshMailToFavorites();
-        InvokeAsync(StateHasChanged);
+        _inboxFilters.Inbox = inbox;
+        _dynamicDataFilter.NotifyChanged(nameof(InboxFilters.Inbox));
     }
 
-    private void RefreshMailToFavorites()
+    private static List<MessageDto> DeduplicateAndAppend(List<MessageDto> source, List<MessageDto> toAppend)
     {
-        _mailToFavorites = InboxFavoriteState.GetAllFavorites(Domain).ToList();
+        var existingIds = source.Select(m => m.Id).ToHashSet();
+        var newItems = toAppend.Where(m => !existingIds.Contains(m.Id)).ToList();
+        source.AddRange(newItems);
+        return source.OrderByDescending(m => m.Time).ToList();
     }
 
-    private class InboxFilters
-    {
-        public string Inbox { get; set; } = "*";
-    }
+    private string GetCurrentInbox() => string.IsNullOrWhiteSpace(_inboxFilters.Inbox) ? "*" : _inboxFilters.Inbox;
+
+    private void RefreshMailToFavorites() => _mailToFavorites = InboxFavoriteState.GetAllFavorites(Domain).ToList();
+    private void HandleOnFavoriteChanged(string _) => InvokeAsync(StateHasChanged);
+
+    private class InboxFilters { public string Inbox { get; set; } = "*"; }
 
     public void Dispose()
     {
         InboxFavoriteState.OnChanged -= HandleOnFavoriteChanged;
+        _operationLock.Dispose();
     }
 }
