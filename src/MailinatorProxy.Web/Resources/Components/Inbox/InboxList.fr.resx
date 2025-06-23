@@ -33,4 +33,16 @@
   <data name="Inbox_AutoRefreshStartTooltip" xml:space="preserve">
     <value>Démarrer l'auto-rafraîchissement</value>
   </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Chargement...</value>
+  </data>
+  <data name="LoadMore" xml:space="preserve">
+    <value>Charger plus</value>
+  </data>
+  <data name="NoMessages" xml:space="preserve">
+    <value>Aucun message</value>
+  </data>
+  <data name="NoMoreMessages" xml:space="preserve">
+    <value>Plus de messages</value>
+  </data>
 </root>
