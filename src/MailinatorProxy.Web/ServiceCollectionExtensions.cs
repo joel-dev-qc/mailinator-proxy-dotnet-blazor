@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<InboxFilterState>();
         services.AddScoped<InboxFavoriteState>();
         services.AddScoped<MailReadState>();
+        services.AddScoped<InboxListState>();
         return services;
     }
 
