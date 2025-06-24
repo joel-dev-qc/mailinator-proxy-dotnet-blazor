@@ -111,7 +111,7 @@
         <div class="d-flex justify-center my-4 pa-4">
             @if (InboxDataService.HasMoreData(Domain))
             {
-                <MudButton Disabled="_isLoading" OnClick="LoadMoreItems" StartIcon="@Icons.Material.Filled.MoreHoriz">
+                <MudButton Disabled="_isLoading" OnClick="LoadMoreItems" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.MoreHoriz">
                     @(_isLoading ? @L["Loading"] : @L["LoadMore"])
                 </MudButton>
             }
@@ -145,7 +145,7 @@
     private AutoRefreshWrapper _autoRefresh;
     private List<string> _mailToFavorites = [];
 
-    private int _pageSize = 2;
+    private int _pageSize = 15;
     private bool _isLoading = false;
 
     private InboxFilters _inboxFilters = new();
