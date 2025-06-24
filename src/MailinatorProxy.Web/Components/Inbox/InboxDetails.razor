@@ -206,6 +206,37 @@ else
         var htmlDoc = new HtmlAgilityPack.HtmlDocument();
         htmlDoc.LoadHtml(body);
 
+        // Adding some style to enforce visibility on dark mode
+        var headNode = htmlDoc.DocumentNode.SelectSingleNode("//head");
+        if (headNode == null)
+        {
+            // If the head node does not exist, create it
+            headNode = htmlDoc.CreateElement("head");
+            htmlDoc.DocumentNode.PrependChild(headNode);
+        }
+
+        // Create a style node to set default styles and dark mode support
+        var styleNode = htmlDoc.CreateElement("style");
+        styleNode.InnerHtml = @"
+            :root {
+                color-scheme: light dark;
+            }
+            body {
+                background-color: white;
+                color: black;
+            }
+            @media (prefers-color-scheme: dark) {
+                body {
+                    background-color: #121212;
+                    color: #e0e0e0;
+                }
+                a {
+                    color: #90caf9;
+                }
+            }
+        ";
+        headNode.AppendChild(styleNode);
+
         var links = htmlDoc.DocumentNode.SelectNodes("//a");
         if (links != null)
         {
