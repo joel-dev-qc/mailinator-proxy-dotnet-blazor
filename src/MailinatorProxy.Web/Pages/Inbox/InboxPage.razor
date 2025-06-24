@@ -12,6 +12,7 @@
 @inject NavigationManager NavigationManager
 @inject IBreadcrumbService BreadcrumbService
 @inject IStringLocalizer<InboxPage> L
+@inject IInboxDataService InboxDataService
 
 <DomainGuard Domain="@Domain">
     <PageHeader PageTitle="@GetPageTitle()" BreadcrumbItems="@BreadcrumbService.GetInboxBreadcrumbs(Domain, MailId)"/>
@@ -42,8 +43,8 @@
 
     private async Task OnDeleteMessage(MessageDto message)
     {
-        await MailinatorApiClient.DeleteMailByIdAsync(Domain, message.To, message.Id);
-        await MailReadState.RemoveAsync(Domain, message.Id);
+        await InboxDataService.DeleteMessageAsync(Domain, message.To, message.Id);
+        StateHasChanged();
     }
 
     private string GetPageTitle()

@@ -34,7 +34,15 @@ internal sealed class InboxDataService(
                 return (domainState.Messages, domainState.HasMoreData);
             }
 
-            var messages = await LoadInboxMessagesAsync(domain, inbox, offset, pageSize);
+            // Load 1 more than the page size to check if there are more messages
+            int fetchCount = pageSize + 1;
+            var messages = await LoadInboxMessagesAsync(domain, inbox, offset, fetchCount);
+
+            bool hasMoreData = messages.Count > pageSize;
+            if (hasMoreData)
+            {
+                messages = messages.Take(pageSize).ToList();
+            }
 
             if (offset == 0)
             {
@@ -48,7 +56,7 @@ internal sealed class InboxDataService(
             }
 
             domainState.CurrentOffset = offset + messages.Count;
-            domainState.HasMoreData = messages.Count >= pageSize;
+            domainState.HasMoreData = hasMoreData;
             domainState.CurrentInbox = inbox;
 
             return (domainState.Messages, domainState.HasMoreData);
@@ -106,16 +114,18 @@ internal sealed class InboxDataService(
         {
             await mailinatorApiClient.DeleteMailByIdAsync(domain, inbox, messageId);
 
-            // Mettre à jour l'état en supprimant le message
+            // Ensure we remove the message from the state
             var domainState = inboxListState.GetOrCreateDomainState(domain);
             domainState.Messages.RemoveAll(m => m.Id == messageId);
+
+            await mailReadStateService.RemoveAsync(domain, messageId);
 
             snackbar.Add(localizer["MessageDeleted_Info"], Severity.Info);
             return true;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Erreur lors de la suppression du message");
+            logger.LogError(ex, "An error occurred while deleting the message");
             snackbar.Add(localizer["MessageDelete_Error"], Severity.Error);
             return false;
         }
