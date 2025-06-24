@@ -1,5 +1,4 @@
 @using MailinatorProxy.Shared.Dtos.Mails
-@using MailinatorProxy.Web.ApiClients
 @using MailinatorProxy.Web.Components.AutoRefresh
 @using MailinatorProxy.Web.Extensions
 @using MailinatorProxy.Web.States
@@ -153,15 +152,39 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _inboxFilters.Inbox = InboxDataService.GetCurrentInbox(Domain);
-
         await InboxFavoriteState.InitializeAsync(Domain);
         RefreshMailToFavorites();
         InboxFavoriteState.OnChanged += HandleOnFavoriteChanged;
+    }
 
-        if (InboxDataService.GetCurrentMessages(Domain).Count == 0)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            await ReloadData();
+            SynchronizeInboxState();
+
+            if (InboxDataService.GetCurrentMessages(Domain).Count == 0)
+            {
+                await ReloadData();
+            }
+        }
+    }
+
+    private void SynchronizeInboxState()
+    {
+        var serviceInbox = InboxDataService.GetCurrentInbox(Domain);
+        var uiInbox = _inboxFilters.Inbox;
+
+        // If UI shows default value "*" but service has a different value, update UI
+        if (uiInbox == "*" && serviceInbox != "*")
+        {
+            _inboxFilters.Inbox = serviceInbox;
+            _dynamicDataFilter.NotifyChanged(nameof(InboxFilters.Inbox));
+        }
+        // Otherwise, update service with UI value
+        else
+        {
+            InboxDataService.SetCurrentInbox(Domain, uiInbox);
         }
     }
 
