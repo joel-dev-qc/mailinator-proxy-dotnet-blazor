@@ -1,0 +1,31 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<AutoRefreshStatus> L
+
+<MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+    @if (IsEnabled)
+    {
+        <MudChip
+            T="string"
+            Color="Color.Primary"
+                 Variant="Variant.Outlined"
+                 Size="Size.Small"
+                 Class="text-white">
+            @($"Dans {Countdown}s")
+        </MudChip>
+    }
+
+    @if (LastUpdatedUtc.HasValue)
+    {
+        <MudText Typo="Typo.body2"
+                 Color="Color.Inherit"
+                 Class="ml-2">
+            @($"Dernière mise à jour {LastUpdatedUtc.Value.ToLocalTime():HH:mm:ss}")
+        </MudText>
+    }
+</MudStack>
+
+@code {
+    [Parameter] public bool IsEnabled { get; set; }
+    [Parameter] public int Countdown { get; set; }
+    [Parameter] public DateTime? LastUpdatedUtc { get; set; }
+}

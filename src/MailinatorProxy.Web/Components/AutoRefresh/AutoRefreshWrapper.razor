@@ -1,0 +1,50 @@
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Logging
+@using MailinatorProxy.Web.Services
+@implements IDisposable
+@inject ILogger<AutoRefreshWrapper> Logger
+@inject IStringLocalizer<AutoRefreshWrapper> L
+@inject IAutoRefreshService RefreshService
+
+<div>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; }
+    [Parameter, EditorRequired] public Func<Task> OnRefresh { get; set; }
+    [Parameter] public int RefreshIntervalSeconds { get; set; } = 5;
+
+    public bool IsEnabled => RefreshService.IsEnabled;
+    public int Countdown => RefreshService.Countdown;
+    public DateTime? LastUpdatedUtc => RefreshService.LastUpdatedUtc;
+
+    protected override void OnInitialized()
+    {
+        RefreshService.Initialize(RefreshIntervalSeconds, OnRefresh);
+        RefreshService.OnCountdownChanged += OnCountdownChanged;
+        RefreshService.OnRefreshInitiated += OnRefreshInitiated;
+    }
+
+    private void OnCountdownChanged() => InvokeAsync(StateHasChanged);
+    private void OnRefreshInitiated() => InvokeAsync(StateHasChanged);
+
+    public void Toggle() => RefreshService.Toggle();
+    public Task RefreshAsync() => RefreshService.RefreshAsync();
+    public void ResetCountdown() => RefreshService.ResetCountdown();
+
+    public void Dispose()
+    {
+        RefreshService.OnCountdownChanged -= OnCountdownChanged;
+        RefreshService.OnRefreshInitiated -= OnRefreshInitiated;
+    }
+
+    public RenderFragment Status => builder =>
+    {
+        builder.OpenComponent<AutoRefreshStatus>(0);
+        builder.AddAttribute(1, "IsEnabled", IsEnabled);
+        builder.AddAttribute(2, "Countdown", Countdown);
+        builder.AddAttribute(3, "LastUpdatedUtc", LastUpdatedUtc);
+        builder.CloseComponent();
+    };
+}

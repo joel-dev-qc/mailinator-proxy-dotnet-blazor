@@ -1,15 +1,14 @@
 @using MailinatorProxy.Shared.Dtos.Mails
 @using MailinatorProxy.Web.ApiClients
+@using MailinatorProxy.Web.Components.AutoRefresh
 @using MailinatorProxy.Web.Extensions
 @using MailinatorProxy.Web.States
 @using Microsoft.Extensions.Localization
-@inject IMalinatorApiClient MailinatorApiClient
+@using MailinatorProxy.Web.Services
 @inject InboxFavoriteState InboxFavoriteState
-@inject MailReadState MailReadStateService
-@inject ISnackbar Snackbar
+@inject IInboxDataService InboxDataService
 @inject IStringLocalizer<InboxList> L
 @inject ILogger<InboxList> Logger
-@inject InboxListState InboxListState
 
 <style>
     tr.unread-row td,
@@ -65,12 +64,12 @@
                 </MudStack>
 
                 <MudSpacer/>
-                <MudText Typo="Typo.body2">@_domainState.Messages.Count message(s)</MudText>
+                <MudText Typo="Typo.body2">@InboxDataService.GetCurrentMessages(Domain).Count message(s)</MudText>
             </MudStack>
         </div>
 
 
-        <MudTable Items="_domainState.Messages"
+        <MudTable Items="@InboxDataService.GetCurrentMessages(Domain)"
                   Hover="true"
                   @ref="_table"
                   Loading="@_isLoading"
@@ -111,13 +110,13 @@
         </MudTable>
 
         <div class="d-flex justify-center my-4 pa-4">
-            @if (_domainState.HasMoreData)
+            @if (InboxDataService.HasMoreData(Domain))
             {
                 <MudButton Disabled="_isLoading" OnClick="LoadMoreItems" StartIcon="@Icons.Material.Filled.MoreHoriz">
                     @(_isLoading ? @L["Loading"] : @L["LoadMore"])
                 </MudButton>
             }
-            else if (_domainState.Messages.Count == 0)
+            else if (InboxDataService.GetCurrentMessages(Domain).Count == 0)
             {
                 <MudText Typo="Typo.caption">@L["NoMessages"]</MudText>
             }
@@ -128,7 +127,6 @@
         </div>
     </MudPaper>
 </AutoRefreshWrapper>
-
 
 @code {
     [Parameter] public string Domain { get; set; } = string.Empty;
@@ -141,28 +139,28 @@
     private DynamicDataFilter _dynamicDataFilter;
     private AutoRefreshWrapper _autoRefresh;
     private List<string> _mailToFavorites = [];
-    private InboxListState.DomainInboxState _domainState;
 
     private int _pageSize = 2;
     private bool _isLoading = false;
-    private SemaphoreSlim _operationLock = new(1, 1);
 
     private InboxFilters _inboxFilters = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _domainState = InboxListState.GetOrCreateDomainState(Domain);
-        _inboxFilters.Inbox = _domainState.CurrentInbox;
+        _inboxFilters.Inbox = InboxDataService.GetCurrentInbox(Domain);
 
         await InboxFavoriteState.InitializeAsync(Domain);
         RefreshMailToFavorites();
         InboxFavoriteState.OnChanged += HandleOnFavoriteChanged;
-        await ReloadData();
+
+        if (InboxDataService.GetCurrentMessages(Domain).Count == 0)
+        {
+            await ReloadData();
+        }
     }
 
     private async Task CheckForNewMessages()
     {
-
         if (_isLoading) return;
 
         try
@@ -170,30 +168,7 @@
             _isLoading = true;
             StateHasChanged();
 
-            var latestMessages = await LoadInboxAsync(0, RefreshWindowSize);
-
-            // Prevent duplicate messages by checking against current messages
-            var currentIds = new HashSet<string>(_domainState.Messages.Select(m => m.Id));
-            var newMessages = latestMessages
-                .Where(m => !currentIds.Contains(m.Id))
-                .ToList();
-
-            if (newMessages.Count > 0)
-            {
-                foreach (var msg in newMessages)
-                {
-                    _domainState.ReadStates[msg.Id] = await MailReadStateService.IsReadAsync(Domain, msg.Id);
-                }
-
-                _domainState.Messages.InsertRange(0, newMessages);
-
-                StateHasChanged();
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error checking for new messages.");
-            Snackbar.Add(L["Inbox_LoadError"], Severity.Error);
+            await InboxDataService.CheckForNewMessagesAsync(Domain, GetCurrentInbox(), RefreshWindowSize);
         }
         finally
         {
@@ -206,74 +181,45 @@
     {
         if (_isLoading) return;
 
-        await _operationLock.WaitAsync();
         try
         {
             _isLoading = true;
             StateHasChanged();
 
-            var newMessages = await LoadInboxAsync(0, _pageSize);
-            _domainState.Messages = DeduplicateAndAppend(newMessages, _domainState.Messages);
-            _domainState.CurrentOffset = newMessages.Count;
-            _domainState.HasMoreData = newMessages.Count >= _pageSize;
+            await InboxDataService.LoadInboxDataAsync(Domain, GetCurrentInbox(), 0, _pageSize);
         }
         finally
         {
             _isLoading = false;
             StateHasChanged();
-            _operationLock.Release();
         }
     }
 
     private async Task LoadMoreItems()
     {
-        if (_isLoading || !_domainState.HasMoreData) return;
+        if (_isLoading || !InboxDataService.HasMoreData(Domain)) return;
 
-        await _operationLock.WaitAsync();
         try
         {
             _isLoading = true;
             StateHasChanged();
 
-            var moreMessages = await LoadInboxAsync(_domainState.CurrentOffset, _pageSize);
-            _domainState.Messages = DeduplicateAndAppend(_domainState.Messages, moreMessages);
+            var offset = InboxDataService.GetCurrentMessages(Domain).Count;
+            await InboxDataService.LoadInboxDataAsync(Domain, GetCurrentInbox(), offset, _pageSize);
 
-            _domainState.CurrentOffset = _domainState.Messages.Count;
-            _domainState.HasMoreData = moreMessages.Count >= _pageSize;
-
-            // Ensure that the auto-refresh countdown is reset after loading more items. To prevent it from triggering immediately after loading.
+            // Ensure that the auto-refresh countdown is reset after loading more items
             _autoRefresh.ResetCountdown();
         }
         finally
         {
             _isLoading = false;
             StateHasChanged();
-            _operationLock.Release();
-        }
-    }
-
-    private async Task<List<MessageDto>> LoadInboxAsync(int skip, int limit)
-    {
-        try
-        {
-            var result = await MailinatorApiClient.GetMailInboxAsync(Domain, GetCurrentInbox(), skip: skip, limit: limit);
-            foreach (var msg in result.Messages)
-            {
-                _domainState.ReadStates[msg.Id] = await MailReadStateService.IsReadAsync(Domain, msg.Id);
-            }
-            return result.Messages;
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error loading inbox");
-            Snackbar.Add(L["Inbox_LoadError"], Severity.Error);
-            return new();
         }
     }
 
     private string GetRowClass(MessageDto msg, int index)
     {
-        return _domainState.ReadStates.TryGetValue(msg.Id, out var read) && !read ? "unread-row cursor-pointer" : "cursor-pointer";
+        return InboxDataService.IsMessageUnread(Domain, msg.Id) ? "unread-row cursor-pointer" : "cursor-pointer";
     }
 
     private async Task DeleteMessage(MessageDto msg)
@@ -281,8 +227,7 @@
         if (OnDeleteMessage.HasDelegate)
         {
             await OnDeleteMessage.InvokeAsync(msg);
-            await ReloadData();
-            Snackbar.Add(L["MessageDeleted_Info"], Severity.Info);
+            await InboxDataService.DeleteMessageAsync(Domain, GetCurrentInbox(), msg.Id);
         }
     }
 
@@ -297,18 +242,11 @@
     private void OnInboxToFiltersChanged(string inbox)
     {
         _inboxFilters.Inbox = inbox;
+        InboxDataService.SetCurrentInbox(Domain, inbox);
         _dynamicDataFilter.NotifyChanged(nameof(InboxFilters.Inbox));
     }
 
-    private static List<MessageDto> DeduplicateAndAppend(List<MessageDto> source, List<MessageDto> toAppend)
-    {
-        var existingIds = source.Select(m => m.Id).ToHashSet();
-        var newItems = toAppend.Where(m => !existingIds.Contains(m.Id)).ToList();
-        source.AddRange(newItems);
-        return source.OrderByDescending(m => m.Time).ToList();
-    }
-
-    private string GetCurrentInbox() => string.IsNullOrWhiteSpace(_inboxFilters.Inbox) ? "*" : _inboxFilters.Inbox;
+    private string GetCurrentInbox() => InboxDataService.GetCurrentInbox(Domain);
 
     private void RefreshMailToFavorites() => _mailToFavorites = InboxFavoriteState.GetAllFavorites(Domain).ToList();
     private void HandleOnFavoriteChanged(string _) => InvokeAsync(StateHasChanged);
@@ -318,6 +256,5 @@
     public void Dispose()
     {
         InboxFavoriteState.OnChanged -= HandleOnFavoriteChanged;
-        _operationLock.Dispose();
     }
 }

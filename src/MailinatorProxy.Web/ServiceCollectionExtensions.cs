@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
+using MailinatorProxy.Web.Components.AutoRefresh;
 using MailinatorProxy.Web.Services;
 using MailinatorProxy.Web.States;
 using MailinatorProxy.Web.Stores;
@@ -37,6 +38,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClipboardService, ClipboardService>();
         services.AddScoped<IDomainService, DomainService>();
         services.AddScoped<ILayoutService, LayoutService>();
+        services.AddScoped<IAutoRefreshService, AutoRefreshService>();
+        services.AddScoped<IInboxDataService, InboxDataService>();
         // Ajoute ici d'autres services si besoin
         return services;
     }
