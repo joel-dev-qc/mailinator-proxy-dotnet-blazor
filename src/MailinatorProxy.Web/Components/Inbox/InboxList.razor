@@ -118,11 +118,17 @@
             }
             else if (InboxDataService.GetCurrentMessages(Domain).Count == 0)
             {
-                <MudText Typo="Typo.caption">@L["NoMessages"]</MudText>
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <EmptyInbox Size="200" />
+                    <MudText Typo="Typo.h3">@L["NoMessages"]</MudText>
+                </MudStack>
             }
             else
             {
-                <MudText Typo="Typo.caption">@L["NoMoreMessages"]</MudText>
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <NoMoreMessage/>
+                    <MudText Typo="Typo.body2">@L["NoMoreMessages"]</MudText>
+                </MudStack>
             }
         </div>
     </MudPaper>
@@ -239,11 +245,14 @@
         }
     }
 
-    private void OnInboxToFiltersChanged(string inbox)
+    private async Task OnInboxToFiltersChanged(string inbox)
     {
+        InboxDataService.ClearState(Domain);
         _inboxFilters.Inbox = inbox;
         InboxDataService.SetCurrentInbox(Domain, inbox);
         _dynamicDataFilter.NotifyChanged(nameof(InboxFilters.Inbox));
+
+        await ReloadData();
     }
 
     private string GetCurrentInbox() => InboxDataService.GetCurrentInbox(Domain);

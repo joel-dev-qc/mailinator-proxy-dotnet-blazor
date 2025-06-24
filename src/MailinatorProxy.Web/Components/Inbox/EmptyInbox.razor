@@ -1,0 +1,54 @@
+@code {
+    [Parameter] public int Size { get; set; } = 160;
+}
+
+
+<div class="empty-inbox-container" style="width:@(Size)px; height:@(Size)px;">
+    <svg class="empty-inbox-svg" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+        <!-- Enveloppe -->
+        <path d="M40 80 L80 110 L120 80 V120 H40 Z" fill="#607D8B" />
+        <path d="M40 80 L80 50 L120 80 L80 110 Z" fill="#78909C" />
+
+        <!-- Lettres flottantes -->
+        <rect x="50" y="20" width="20" height="12" rx="2" class="floating-letter"/>
+        <rect x="90" y="10" width="24" height="14" rx="2" class="floating-letter delay"/>
+        <rect x="70" y="35" width="18" height="10" rx="2" class="floating-letter slower"/>
+
+        <!-- Traits de mouvement -->
+        <path d="M60 18 l-2 -4" stroke="#90A4AE" stroke-width="1"/>
+        <path d="M95 8 l-1.5 -3" stroke="#90A4AE" stroke-width="1"/>
+        <path d="M75 33 l-1 -3" stroke="#90A4AE" stroke-width="1"/>
+    </svg>
+</div>
+
+<style>
+.empty-inbox-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.empty-inbox-svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Animation douce */
+@@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-5px); opacity: 0.85; }
+}
+
+.floating-letter {
+    fill: #CFD8DC;
+    animation: floatUp 4s ease-in-out infinite alternate;
+}
+
+.floating-letter.slower {
+    animation-duration: 6s;
+}
+
+.floating-letter.delay {
+    animation-delay: 2s;
+}
+</style>
