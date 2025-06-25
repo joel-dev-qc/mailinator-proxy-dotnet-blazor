@@ -11,6 +11,8 @@
 @code {
     [Parameter, EditorRequired] public required GetTeamStatsQueryResponse Stats { get; set; }
 
+    private List<TeamStatDto> _teamStats => Stats.TeamStats.OrderByDescending(x => x.Date).Take(5).Reverse().ToList();
+
     private readonly AxisChartOptions _axisChartOptions = new()
     {
     };
@@ -25,14 +27,14 @@
         new ChartSeries
         {
             Name = "API Mail Retrieved",
-            Data = Stats.TeamStats.Take(5).Select(s => (double)s.Retrieved.ApiEmail).ToArray()
+            Data = _teamStats.Select(s => (double)s.Retrieved.ApiEmail).ToArray()
         },
         new ChartSeries
         {
             Name = "API Errors",
-            Data = Stats.TeamStats.Take(5).Select(s => (double)s.Retrieved.ApiError).ToArray(),
+            Data = _teamStats.Select(s => (double)s.Retrieved.ApiError).ToArray(),
         },
     };
 
-    private string[] _xAxisLabels => Stats.TeamStats.Select(s => s.Date.ToString("d")).ToArray();
+    private string[] _xAxisLabels => _teamStats.Select(s => s.Date.ToString("d")).ToArray();
 }
