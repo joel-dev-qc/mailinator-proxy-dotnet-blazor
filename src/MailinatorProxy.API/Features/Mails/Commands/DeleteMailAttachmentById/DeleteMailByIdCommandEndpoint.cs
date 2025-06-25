@@ -1,3 +1,5 @@
+using Carter;
+using MailinatorProxy.API.Common.Constants;
 using MailinatorProxy.Shared.Dtos.Mails;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
@@ -5,11 +7,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace MailinatorProxy.API.Features.Mails.Commands.DeleteMailAttachmentById;
 
-internal static class DeleteMailByIdCommandEndpoint
+internal class DeleteMailByIdCommandEndpoint : ICarterModule
 {
-    public static void RegisterRoute(IEndpointRouteBuilder app)
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/{Domain}/{Inbox}/{MessageId}", async Task<Ok<DeleteMailByIdCommandResponse>> (
+        app.MapDelete("/mails/{Domain}/{Inbox}/{MessageId}", async Task<Ok<DeleteMailByIdCommandResponse>> (
                 ISender mediator,
                 [AsParameters] DeleteMailByIdCommand request,
                 CancellationToken cancellationToken) =>
@@ -22,6 +24,7 @@ internal static class DeleteMailByIdCommandEndpoint
             .WithMetadata()
             .WithSummary("Delete Mail Attachment By Id")
             .WithName("DeleteMailAttachmentById")
+            .WithTags(ApiTags.Mails)
             .WithDescription("This endpoint deletes a specific messages");
     }
 }

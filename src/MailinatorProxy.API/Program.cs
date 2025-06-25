@@ -1,3 +1,4 @@
+using Carter;
 using MailinatorProxy.API;
 using MailinatorProxy.API.Common.Extensions;
 using MartinCostello.OpenApi;
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddMailinatorApiClientProxy(builder.Configuration);
 builder.Services.AddMediatR();
+builder.Services.AddCarter();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi(options =>
 {
@@ -52,7 +54,6 @@ app.UseHttpsRedirection();
 
 app.UseExceptionHandler();
 
-app.MapEndpoints();
-
+app.MapCarter();
 
 app.Run();

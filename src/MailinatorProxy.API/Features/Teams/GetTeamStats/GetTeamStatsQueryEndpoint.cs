@@ -1,16 +1,18 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Carter;
+using MailinatorProxy.API.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace MailinatorProxy.API.Features.Teams.GetTeamStats;
 
-public static class GetTeamStatsQueryEndpoint
+public class GetTeamStatsQueryEndpoint : ICarterModule
 {
-    public static void RegisterRoute(IEndpointRouteBuilder app)
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("stats", async Task<Ok<GetTeamStatsQueryResponse>> (
+        app.MapGet("/teams/stats", async Task<Ok<GetTeamStatsQueryResponse>> (
                 ISender mediator,
                 CancellationToken cancellationToken) =>
             {
@@ -18,6 +20,8 @@ public static class GetTeamStatsQueryEndpoint
                 return TypedResults.Ok(response);
             })
             .WithName("GetTeamStats")
+
+            .WithTags(ApiTags.Teams)
             .WithSummary("Get team stats")
             .WithDescription(
                 "This endpoint retrieves the statistics for the team, including team stats and plan details.")

@@ -7,6 +7,7 @@
     <PackageVersion Include="Azure.Identity" Version="1.13.1" />
     <PackageVersion Include="Blazored.FluentValidation" Version="2.2.0" />
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageVersion Include="Carter" Version="9.0.0" />
     <PackageVersion Include="Extensions.MudBlazor.StaticInput" Version="2.1.5" />
     <PackageVersion Include="FuzzySharp" Version="2.0.2" />
     <PackageVersion Include="HighlightBlazor" Version="0.1.10" />

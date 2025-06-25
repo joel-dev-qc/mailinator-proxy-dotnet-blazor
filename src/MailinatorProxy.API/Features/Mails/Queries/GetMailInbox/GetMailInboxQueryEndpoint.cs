@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Carter;
+using MailinatorProxy.API.Common.Constants;
 using MailinatorProxy.Shared.Dtos.Mails;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -8,11 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 
-internal static class GetMailInboxQueryEndpoint
+internal class GetMailInboxQueryEndpoint : ICarterModule
 {
-    public static void RegisterRoute(IEndpointRouteBuilder group)
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
-        group.MapGet("/{Domain}/{Inbox}", async Task<Ok<GetMailInboxQueryResponse>> (
+        app.MapGet("/{Domain}/{Inbox}", async Task<Ok<GetMailInboxQueryResponse>> (
                 ISender mediator,
                 [AsParameters] GetMailInboxQuery query,
                 CancellationToken cancellationToken) =>
@@ -25,6 +27,7 @@ internal static class GetMailInboxQueryEndpoint
             .WithMetadata()
             .WithSummary("Get Mail Inbox")
             .WithName("GetMailInbox")
+            .WithTags(ApiTags.Mails)
             .WithDescription("This endpoint retrieves a list of messages summaries. You can retrieve a list by inbox, inboxes, or entire domain.");
     }
 }
