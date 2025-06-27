@@ -432,3 +432,6 @@ FodyWeavers.xsd
 
 # Ignore custom settings for run/debug configurations
 .idea/runConfigurations/
+
+# Ignore env files
+.env
