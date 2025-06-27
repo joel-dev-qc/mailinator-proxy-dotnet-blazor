@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: src/MailinatorProxy.API/Dockerfile
+    container_name: mailinator-proxy-api
+    ports:
+      - "7291:7291"
+    env_file:
+      - ../.env
+    environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+        - ASPNETCORE_URLS=http://*:7291
+
+  web:
+    build:
+      context: ..
+      dockerfile: src/MailinatorProxy.Web/Dockerfile
+    container_name: mailinator-proxy-web
+    ports:
+      - "80:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MailinatorProxyApiOptions__BaseUrl=http://localhost:8080
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+        - api

@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MailinatorProxy.API.Features.Mails.Queries.GetMailInbox;
 
-internal class GetMailInboxQueryEndpoint : ICarterModule
+public class GetMailInboxQueryEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/{Domain}/{Inbox}", async Task<Ok<GetMailInboxQueryResponse>> (
+        app.MapGet("/mails/{Domain}/{Inbox}", async Task<Ok<GetMailInboxQueryResponse>> (
                 ISender mediator,
                 [AsParameters] GetMailInboxQuery query,
                 CancellationToken cancellationToken) =>
