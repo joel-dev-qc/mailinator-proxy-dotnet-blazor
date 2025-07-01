@@ -10,10 +10,10 @@
 @using Microsoft.Extensions.Localization
 @inject IClipboardService ClipboardService
 @inject NavigationManager NavigationManager
-@inject IMalinatorApiClient MailinatorApiClient
 @inject MailReadState MailReadStateService
 @inject InboxFilterState InboxFilterState
 @inject IStringLocalizer<InboxDetails> L
+@inject IInboxDataService InboxDataService
 
 @if (_isLoading)
 {
@@ -171,11 +171,10 @@ else
         {
             var inbox = string.IsNullOrWhiteSpace(InboxFilterState.CurrentInbox) ? "*" : InboxFilterState.CurrentInbox;
 
-            await MailReadStateService.MarkAsReadAsync(Domain, MailId);
-            var response = await MailinatorApiClient.GetMailByIdAsync(Domain, inbox, MailId);
-            _message = response.Message;
+            var message = await InboxDataService.GetMessageAsync(Domain, inbox, MailId);
+            _message = message;
 
-            _rawJsonPayload = JsonSerializer.Serialize(response.Message, new JsonSerializerOptions
+            _rawJsonPayload = JsonSerializer.Serialize(message, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase

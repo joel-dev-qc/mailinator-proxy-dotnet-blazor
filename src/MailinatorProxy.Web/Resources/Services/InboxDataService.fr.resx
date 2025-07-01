@@ -51,5 +51,8 @@
     <value>Échec de la suppression du message. Veuillez réessayer plus tard.</value>
     <comment>Message d'erreur affiché lorsque la suppression du message échoue</comment>
   </data>
+  <data name="GetMessage_Error" xml:space="preserve">
+    <value>Échec du chargement du message.</value>
+  </data>
 </root>
 

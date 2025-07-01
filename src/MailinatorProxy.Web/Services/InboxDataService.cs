@@ -135,6 +135,22 @@ internal sealed class InboxDataService(
         }
     }
 
+    public async Task<MessageDto?> GetMessageAsync(string domain, string inbox, string messageId)
+    {
+        try
+        {
+            var response = await mailinatorApiClient.GetMailByIdAsync(domain, inbox, messageId);
+            await mailReadStateService.MarkAsReadAsync(domain, messageId);
+            return response.Message;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occurred while retrieving the message {messageId} in inbox {inbox} for domain {domain}", messageId, inbox, domain);
+            snackbar.Add(localizer["GetMessage_Error"], Severity.Error);
+            throw;
+        }
+    }
+
     public bool IsMessageUnread(string domain, string messageId)
     {
         var domainState = inboxListState.GetOrCreateDomainState(domain);
@@ -187,6 +203,15 @@ internal sealed class InboxDataService(
         var newItems = toAppend.Where(m => !existingIds.Contains(m.Id)).ToList();
         source.AddRange(newItems);
         return source.OrderByDescending(m => m.Time).ToList();
+    }
+
+    public async Task SyncReadStatesAsync(string domain)
+    {
+        var domainState = inboxListState.GetOrCreateDomainState(domain);
+        foreach (var msg in domainState.Messages)
+        {
+            domainState.ReadStates[msg.Id] = await mailReadStateService.IsReadAsync(domain, msg.Id);
+        }
     }
 
     public void Dispose()

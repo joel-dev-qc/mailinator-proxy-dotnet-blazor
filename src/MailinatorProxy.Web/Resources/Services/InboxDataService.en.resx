@@ -51,5 +51,8 @@
     <value>Failed to delete message. Please try again later.</value>
     <comment>Error message displayed when message deletion fails</comment>
   </data>
+  <data name="GetMessage_Error" xml:space="preserve">
+    <value>Failed to load the message.</value>
+  </data>
 </root>
 

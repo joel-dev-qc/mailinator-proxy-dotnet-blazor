@@ -155,6 +155,9 @@
         await InboxFavoriteState.InitializeAsync(Domain);
         RefreshMailToFavorites();
         InboxFavoriteState.OnChanged += HandleOnFavoriteChanged;
+
+        await InboxDataService.SyncReadStatesAsync(Domain);
+        StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
