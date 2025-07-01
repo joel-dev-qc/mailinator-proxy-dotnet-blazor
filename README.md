@@ -52,7 +52,7 @@ In the API project folder, run:
 ```bash
 dotnet user-secrets init
 dotnet user-secrets set "Mailinator:ApiKey" "your-mailinator-api-key"
-
+```
 
 ### 🔹 Option 2 – Docker / Docker Compose using a `.env` file
 
