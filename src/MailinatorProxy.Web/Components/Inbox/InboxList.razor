@@ -284,7 +284,11 @@
     private string GetCurrentInbox() => InboxDataService.GetCurrentInbox(Domain);
 
     private void RefreshMailToFavorites() => _mailToFavorites = InboxFavoriteState.GetAllFavorites(Domain).ToList();
-    private void HandleOnFavoriteChanged(string _) => InvokeAsync(StateHasChanged);
+    private void HandleOnFavoriteChanged(string _)
+    {
+        RefreshMailToFavorites();
+        InvokeAsync(StateHasChanged);
+    }
 
     private class InboxFilters { public string Inbox { get; set; } = "*"; }
 
